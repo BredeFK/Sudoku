@@ -18,12 +18,12 @@ public class SudukoViewController {
 
     @FXML
     void onEasyClick(ActionEvent event) {
-    	System.out.println("REEEEEEEEEEEEEEEEEEE");
+    	System.out.println("REEEEEEEEEEEEEEEEEEE - Easy");
     }
 
     @FXML
     void onMediumClick(ActionEvent event) {
-
+    	System.out.println("REEEEEEEEEEEEEEEEEEE - Medium");
     }
 
 }

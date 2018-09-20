@@ -9,21 +9,18 @@ import javafx.stage.Stage;
 public class Sudoku extends Application  {
 	
 	public static void main(String[] args) {
-		//launch(args);
+		launch(args);
 
 	}
 
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		/*
-		Parent root = FXMLLoader.load(getClass().getResource("SudukoViwew.fxml"));
+		Parent root = FXMLLoader.load(getClass().getResource("SudukoView.fxml"));
 		Scene scene = new Scene(root);
-		primaryStage.setTitle("Tegne Linjer");
+		primaryStage.setTitle("Suduko");
 		primaryStage.setScene(scene);
 		primaryStage.show();
-		*/
-		
 	}
 
 }
