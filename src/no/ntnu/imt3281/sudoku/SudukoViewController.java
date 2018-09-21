@@ -10,6 +10,7 @@ import javafx.scene.layout.GridPane;
 
 import javax.swing.text.ChangedCharSetException;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -17,7 +18,8 @@ import javafx.event.ActionEvent;
 public class SudukoViewController {
 	
 	private static final int NUMB_ROW = 9;
-	private static final int NUMB_COLUMN = 9;
+	private static final int NUMB_COLUMN = NUMB_ROW;
+	private static final int SUB_GRID = NUMB_ROW / 3;
 	private TextField[][] textFields;
 	 
 	public SudukoViewController() {
@@ -55,37 +57,43 @@ public class SudukoViewController {
 		for(int row = 0; row < NUMB_ROW; row++) {
 			for(int col = 0; col < NUMB_COLUMN; col++) {
 				
-				TextField field = new TextField();
-				field.setMinHeight((borderPane.getHeight()-toolBar.getHeight())/NUMB_COLUMN);
-				field.setMaxWidth(borderPane.getWidth()/NUMB_ROW);
-				textFields[row][col] = field;
+				textFields[row][col] = new TextField();
 				
-				grid.add(field, col, row);
+				textFields[row][col].setMinHeight((borderPane.getHeight()-toolBar.getHeight())/NUMB_COLUMN);
+				textFields[row][col].setMaxWidth(borderPane.getWidth()/NUMB_ROW);
+				
+				grid.add(textFields[row][col], col, row);
 				
 				final int selectedRow = row;
 				final int selectedCol = col;
+				//field.setText(selectedRow + ", " + selectedCol);
 				
 				textFields[row][col].textProperty().addListener(new ChangeListener<String>() {
 					@Override
 					public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
 						
 						// Make sure input isn't empty and is an number
-						if(!newValue.isEmpty() && newValue.matches("\\d+")) {
+						if(!newValue.isEmpty() && newValue.matches("\\d")) {
 							
 								// Parse to int
 								int number = Integer.parseInt(newValue);
 								
 								// Make sure its the right input
-								if(number >= 1 && number <= 9) {
+								if(number >= 1 && number <= NUMB_ROW) {
 									
 									// Check rows, columns and boxes
 									check(selectedRow, selectedCol, newValue);
 									
 								} else {
-									textFields[selectedRow][selectedCol].setText("");
+									// Source: https://stackoverflow.com/a/32893573/8883030
+									Platform.runLater(() -> {
+					    				textFields[selectedRow][selectedCol].clear();
+					    			});
 								}
 							} else {
-								textFields[selectedRow][selectedCol].setText("");
+								Platform.runLater(() -> {
+				    				textFields[selectedRow][selectedCol].clear();
+				    			});
 							}
 					}
 				});
@@ -102,7 +110,10 @@ public class SudukoViewController {
     	for(int i = 0; i < NUMB_COLUMN; i++) {
     		if(col != i) {
 	    		if(textFields[row][i].getText().equals(value)){
-	    			textFields[row][col].setText("");
+	    			Platform.runLater(() -> {
+	    				textFields[row][col].clear();
+	    			});
+	    			
 	    			System.out.println("Row: nei");
 	    		} 
     		}
@@ -112,14 +123,34 @@ public class SudukoViewController {
     	for(int j = 0; j < NUMB_ROW; j++) {
     		if(row != j) {
     			if(textFields[j][col].getText().equals(value)) {
-    				textFields[row][col].setText("");
+    				Platform.runLater(() -> {
+	    				textFields[row][col].clear();
+	    			});
     				System.out.println("Col: nei");
     			}
     		}
     	}
     	
-    	// Check box
+    	// Check box 
+    	// Source: https://www.baeldung.com/java-sudoku
+    	int startRow = (row / SUB_GRID) * SUB_GRID;
+    	int startCol = (col / SUB_GRID) * SUB_GRID;
+    	
+    	int endRow = startRow + SUB_GRID;
+    	int endCol = startCol + SUB_GRID;
+    	
+    	for(int r = startRow; r < endRow; r++) {
+    		for(int c = startCol; c < endCol; c++) {
+    			if(r != row && c != col) {
+	    			if(textFields[r][c].getText().equals(value)) {
+	    				Platform.runLater(() -> {
+		    				textFields[row][col].clear();
+		    			});
+	    				System.out.println("SubGrid: nei");
+	    			}
+    			}
+    		}
+    	}
     	
     }
-
 }
