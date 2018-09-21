@@ -6,13 +6,16 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+/**
+ * @author Brede Fritjof Klausen
+ */
+
 public class Sudoku extends Application {
 	private static final int NUMB_ROW = 9;
 	private static final int NUMB_COLUMN = 9;
 
 	public static void main(String[] args) {
 		launch(args);
-
 	}
 
 	@Override
@@ -23,5 +26,4 @@ public class Sudoku extends Application {
 		primaryStage.setScene(scene);
 		primaryStage.show();
 	}
-
 }
