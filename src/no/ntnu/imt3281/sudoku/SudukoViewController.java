@@ -5,8 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
-import org.json.JSONArray;
-
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -19,6 +17,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
@@ -33,35 +33,92 @@ public class SudukoViewController {
 	private static final int NUMB_COLUMN = NUMB_ROW;
 	private static final int SUB_GRID = NUMB_ROW / 3;
 	private TextField[][] textFields;
+	// Source:
+	// https://www.programcreek.com/java-api-examples/?api=javafx.scene.layout.Background
+	private String styleGray = "-fx-control-inner-background: rgba(187, 187, 187, 1);";
+	private String styleWhite = "-fx-control-inner-background: rgba(255, 255, 255, 1);";
+	private String styleRed = "-fx-control-inner-background: rgba(255,0,0,0.5);";
 
 	public SudukoViewController() {
 		textFields = new TextField[NUMB_ROW][NUMB_COLUMN];
+		// Source: https://stackoverflow.com/a/32893573/8883030
 		Platform.runLater(() -> {
 			generateAndCheck();
 		});
 	}
 
 	@FXML
+	private Pane layoutPane;
+
+	@FXML
 	private BorderPane borderPane;
-
-	@FXML
-	private Button btn_Easy, btn_Medium;
-
-	@FXML
-	private GridPane gridID;
 
 	@FXML
 	private ToolBar toolBar;
 
 	@FXML
-	void onEasyClick(ActionEvent event) {
-		System.out.println("Easy button");
-		getJson();
+	private Button btn_New, btn_Mirror, btn_Flip, btn_Blue, btn_Red, btn_Switch, btn_Clear;
+
+	@FXML
+	private GridPane gridID;
+
+	@FXML
+	void onNewClick(ActionEvent event) {
+		System.out.println("onNewClick");
+		initializeBoard();
+		Platform.runLater(() -> {
+			fillBoard();
+		});
 	}
 
 	@FXML
-	void onMediumClick(ActionEvent event) {
-		System.out.println("Medium button");
+	void onMirrorClick(ActionEvent event) {
+		System.out.println("onMirrorClick");
+		initializeBoard();
+		Platform.runLater(() -> {
+			mirrorBoard();
+		});
+	}
+
+	@FXML
+	void onFlipClick(ActionEvent event) {
+		System.out.println("onFlipClick");
+		initializeBoard();
+		Platform.runLater(() -> {
+			flipBoard();
+		});
+	}
+
+	@FXML
+	void onBlueFlipClick(ActionEvent event) {
+		System.out.println("onBlueFlipClick");
+		initializeBoard();
+		Platform.runLater(() -> {
+			flipBlueBoard();
+		});
+	}
+
+	@FXML
+	void onRedFlipClick(ActionEvent event) {
+		System.out.println("onRedFlipClick");
+		initializeBoard();
+		Platform.runLater(() -> {
+			flipRedBoard();
+		});
+	}
+
+	@FXML
+	void onSwitchClick(ActionEvent event) {
+		System.out.println("onSwitchClick");
+		initializeBoard();
+		Platform.runLater(() -> {
+			switchNumbersOnBoard();
+		});
+	}
+
+	@FXML
+	void onClearClick(ActionEvent event) {
+		initializeBoard();
 	}
 
 	/**
@@ -69,12 +126,14 @@ public class SudukoViewController {
 	 */
 	protected void generateAndCheck() {
 		GridPane grid = new GridPane();
+		double gridHeight = borderPane.getHeight() - toolBar.getHeight();
+		Line[] lines = new Line[4];
 		for (int row = 0; row < NUMB_ROW; row++) {
 			for (int col = 0; col < NUMB_COLUMN; col++) {
 
 				textFields[row][col] = new TextField();
 
-				textFields[row][col].setMinHeight(((borderPane.getHeight() - toolBar.getHeight()) / NUMB_COLUMN) - GAP);
+				textFields[row][col].setMinHeight((gridHeight / NUMB_COLUMN) - GAP);
 
 				// Max width is borderPane width divided by number of boxes minus the gap
 				// between each box and the gap between grid and borderPane
@@ -82,7 +141,7 @@ public class SudukoViewController {
 
 				textFields[row][col].setAlignment(Pos.CENTER);
 				textFields[row][col].setFont(Font.font("Verdana", FontWeight.BLACK, 20));
-				grid.setPadding(new Insets(5, 5, 0, 5));
+				grid.setPadding(new Insets(5, 5, 5, 5));
 				grid.setVgap(GAP);
 				grid.setHgap(GAP);
 				grid.add(textFields[row][col], col, row);
@@ -95,92 +154,115 @@ public class SudukoViewController {
 					public void changed(ObservableValue<? extends String> observable, String oldValue,
 							String newValue) {
 
-						// Make sure input isn't empty and is an number
-						if (!newValue.isEmpty() && newValue.matches("\\d")) {
-
-							// Parse to integer
-							int number = Integer.parseInt(newValue);
-
-							// Make sure its the right input
-							if (number >= 1 && number <= NUMB_ROW) {
-
-								// Check rows, columns and boxes
-								if (!isValid(selectedRow, selectedCol, newValue)) {
-									Platform.runLater(() -> {
-										textFields[selectedRow][selectedCol].clear();
-									});
-								}
-
-							} else {
-								// Source: https://stackoverflow.com/a/32893573/8883030
-								Platform.runLater(() -> {
-									textFields[selectedRow][selectedCol].clear();
-								});
-							}
-						} else {
+						// Check rows, columns and boxes
+						switch (isValid(selectedRow, selectedCol, newValue)) {
+						// Input gets deleted
+						case -1:
 							Platform.runLater(() -> {
 								textFields[selectedRow][selectedCol].clear();
 							});
+							break;
+						// Input field gets marked red and not deleted
+						case 0:
+							textFields[selectedRow][selectedCol].setStyle(styleRed);
+							break;
+
+						// Input is valid and marked to default colour
+						case 1:
+							textFields[selectedRow][selectedCol].setStyle(styleWhite);
+							break;
+
+						// default should never be triggered, but delete in case
+						default:
+							Platform.runLater(() -> {
+								textFields[selectedRow][selectedCol].clear();
+							});
+							break;
 						}
 					}
 				});
 			}
 		}
+
+		// I have to have -4 on the vertical and +4 on the horizontal for some reason
+		// this works and I don't know why
+		lines[0] = new Line((borderPane.getWidth() - 4) / 3, 0, (borderPane.getWidth() - 4) / 3, gridHeight);
+		lines[1] = new Line((borderPane.getWidth() - 4) / 1.5f, 0, (borderPane.getWidth() - 4) / 1.5f, gridHeight);
+		lines[2] = new Line(0, (gridHeight + 4) / 3, borderPane.getWidth(), (gridHeight + 4) / 3);
+		lines[3] = new Line(0, (gridHeight + 4) / 1.5f, borderPane.getWidth(), (gridHeight + 4) / 1.5f);
+
+		for (Line line : lines)
+			line.setStrokeWidth(3);
+
 		borderPane.setCenter(grid);
+		layoutPane.getChildren().addAll(lines);
+		// fillBoard();
 	}
 
 	/**
 	 * Checks if the input is valid
 	 * <p>
-	 * Checks the row, column and sub grid box if the input is valid
+	 * Checks the row, column and sub grid box if the input is valid. Returns -1 if
+	 * its illegal input, 0 if it legal but wrong and 1 if it's the right number
 	 * </p>
 	 * 
 	 * @param row   from changed textField
 	 * @param col   from changed textField
 	 * @param value from changed textField
 	 * 
-	 * @return false if input is not valid
+	 * @return integer -1, 0 or 1
 	 */
-	private boolean isValid(int row, int col, String value) {
-		// Check row
-		for (int i = 0; i < NUMB_COLUMN; i++) {
-			if (col != i) {
-				if (textFields[row][i].getText().equals(value)) {
-					System.out.println("Row: nei");
-					return false;
-				}
-			}
-		}
+	private int isValid(int row, int col, String value) {
 
-		// Check column
-		for (int j = 0; j < NUMB_ROW; j++) {
-			if (row != j) {
-				if (textFields[j][col].getText().equals(value)) {
-					System.out.println("Col: nei");
-					return false;
-				}
-			}
-		}
-
-		// Check box
-		// Source: https://www.baeldung.com/java-sudoku
-		int startRow = (row / SUB_GRID) * SUB_GRID;
-		int startCol = (col / SUB_GRID) * SUB_GRID;
-
-		int endRow = startRow + SUB_GRID;
-		int endCol = startCol + SUB_GRID;
-
-		for (int r = startRow; r < endRow; r++) {
-			for (int c = startCol; c < endCol; c++) {
-				if (r != row && c != col) {
-					if (textFields[r][c].getText().equals(value)) {
-						System.out.println("SubGrid: nei");
-						return false;
+		if (value.isEmpty()) {
+			return -1;
+		} else if (!value.matches("\\d")) {
+			System.out.println("Not number");
+			return -1;
+		} else if (Integer.parseInt(value) < 1 || Integer.parseInt(value) > 9) {
+			System.out.println("Not 1-9");
+			return -1;
+		} else {
+			// Check row
+			for (int i = 0; i < NUMB_COLUMN; i++) {
+				if (col != i) {
+					if (textFields[row][i].getText().equals(value)) {
+						System.out.println("Row: nei");
+						return 0;
 					}
 				}
 			}
+
+			// Check column
+			for (int j = 0; j < NUMB_ROW; j++) {
+				if (row != j) {
+					if (textFields[j][col].getText().equals(value)) {
+						System.out.println("Col: nei");
+						return 0;
+					}
+				}
+			}
+
+			// Check box
+			// Source: https://www.baeldung.com/java-sudoku
+			int startRow = (row / SUB_GRID) * SUB_GRID;
+			int startCol = (col / SUB_GRID) * SUB_GRID;
+
+			int endRow = startRow + SUB_GRID;
+			int endCol = startCol + SUB_GRID;
+
+			for (int r = startRow; r < endRow; r++) {
+				for (int c = startCol; c < endCol; c++) {
+					if (r != row && c != col) {
+						if (textFields[r][c].getText().equals(value)) {
+							System.out.println("SubGrid: nei");
+							return 0;
+						}
+					}
+				}
+			}
+			return 1;
 		}
-		return true;
 	}
 
 	/**
@@ -195,25 +277,157 @@ public class SudukoViewController {
 			BufferedReader buffer = new BufferedReader(new FileReader("board.json"));
 			StringBuffer sb = new StringBuffer();
 			String line;
-			int j = 0;
-			String[] temp = null;
-			int sum = 0;
 			while ((line = buffer.readLine()) != null) {
+				System.out.println(line);
 				sb.append(line);
 			}
 
-			JSONArray json = new JSONArray(sb);
-
 		} catch (FileNotFoundException e) {
-			System.out.println("no");
+			System.out.println("File not found");
 			e.printStackTrace();
 
 		} catch (IOException e) {
+			System.out.println("IOException");
 			e.printStackTrace();
-			System.out.println("nopp");
 		}
 
 		return array;
 	}
 
+	private void fillBoard() {
+		// Bruker denne for å teste om funksjonen fungerer
+		int[][] tempBoard = { { 5, 3, -1, -1, 7, -1, -1, -1, -1 }, { 6, -1, -1, 1, 9, 5, -1, -1, -1 },
+				{ -1, 9, 8, -1, -1, -1, -1, 6, -1 }, { 8, -1, -1, -1, 6, -1, -1, -1, 3 },
+				{ 4, -1, -1, 8, -1, 3, -1, -1, 1 }, { 7, -1, -1, -1, 2, -1, -1, -1, 6 },
+				{ -1, 6, -1, -1, -1, -1, 2, 8, -1 }, { -1, -1, -1, 4, 1, 9, -1, -1, 5 },
+				{ -1, -1, -1, -1, 8, -1, -1, 7, 9 } };
+
+		for (int row = 0; row < NUMB_ROW; row++) {
+			for (int col = 0; col < NUMB_COLUMN; col++) {
+				// if number is -1 it's empty
+				if (tempBoard[row][col] != -1) {
+					textFields[row][col].setText(tempBoard[row][col] + "");
+					textFields[row][col].setStyle(styleGray);
+					textFields[row][col].setEditable(false);
+				}
+			}
+		}
+	}
+
+	private void initializeBoard() {
+		for (int row = 0; row < NUMB_ROW; row++) {
+			for (int col = 0; col < NUMB_COLUMN; col++) {
+				textFields[row][col].clear();
+				textFields[row][col].setEditable(true);
+				textFields[row][col].setStyle(styleWhite);
+			}
+		}
+	}
+
+	private void mirrorBoard() {
+		// Bruker denne for å teste om funksjonen fungerer
+		int[][] tempBoard = { { 5, 3, -1, -1, 7, -1, -1, -1, -1 }, { 6, -1, -1, 1, 9, 5, -1, -1, -1 },
+				{ -1, 9, 8, -1, -1, -1, -1, 6, -1 }, { 8, -1, -1, -1, 6, -1, -1, -1, 3 },
+				{ 4, -1, -1, 8, -1, 3, -1, -1, 1 }, { 7, -1, -1, -1, 2, -1, -1, -1, 6 },
+				{ -1, 6, -1, -1, -1, -1, 2, 8, -1 }, { -1, -1, -1, 4, 1, 9, -1, -1, 5 },
+				{ -1, -1, -1, -1, 8, -1, -1, 7, 9 } };
+		int mirrirCol = 0;
+
+		for (int row = 0; row < NUMB_ROW; row++) {
+			for (int col = 0; col < NUMB_COLUMN; col++) {
+				// -1 because it goes to from 0 to 8
+				mirrirCol = (NUMB_COLUMN - 1) - col;
+
+				if (tempBoard[row][mirrirCol] != -1) {
+					textFields[row][col].setText(tempBoard[row][mirrirCol] + "");
+					textFields[row][col].setStyle(styleGray);
+					textFields[row][col].setEditable(false);
+				}
+			}
+		}
+	}
+
+	private void flipBoard() {
+		// Bruker denne for å teste om funksjonen fungerer
+		int[][] tempBoard = { { 5, 3, -1, -1, 7, -1, -1, -1, -1 }, { 6, -1, -1, 1, 9, 5, -1, -1, -1 },
+				{ -1, 9, 8, -1, -1, -1, -1, 6, -1 }, { 8, -1, -1, -1, 6, -1, -1, -1, 3 },
+				{ 4, -1, -1, 8, -1, 3, -1, -1, 1 }, { 7, -1, -1, -1, 2, -1, -1, -1, 6 },
+				{ -1, 6, -1, -1, -1, -1, 2, 8, -1 }, { -1, -1, -1, 4, 1, 9, -1, -1, 5 },
+				{ -1, -1, -1, -1, 8, -1, -1, 7, 9 } };
+
+		int mirrirRow = 0;
+
+		for (int row = 0; row < NUMB_ROW; row++) {
+			for (int col = 0; col < NUMB_COLUMN; col++) {
+				// -1 because it goes to from 0 to 8
+				mirrirRow = (NUMB_ROW - 1) - row;
+
+				if (tempBoard[mirrirRow][col] != -1) {
+					textFields[row][col].setText(tempBoard[mirrirRow][col] + "");
+					textFields[row][col].setStyle(styleGray);
+					textFields[row][col].setEditable(false);
+				}
+			}
+		}
+	}
+
+	private void flipBlueBoard() {
+
+	}
+
+	private void flipRedBoard() {
+
+	}
+
+	private void switchNumbersOnBoard() {
+		// Bruker denne for å teste om funksjonen fungerer
+		int number = -1;
+		TextField field;
+		int[][] tempBoard = { { 5, 3, -1, -1, 7, -1, -1, -1, -1 }, { 6, -1, -1, 1, 9, 5, -1, -1, -1 },
+				{ -1, 9, 8, -1, -1, -1, -1, 6, -1 }, { 8, -1, -1, -1, 6, -1, -1, -1, 3 },
+				{ 4, -1, -1, 8, -1, 3, -1, -1, 1 }, { 7, -1, -1, -1, 2, -1, -1, -1, 6 },
+				{ -1, 6, -1, -1, -1, -1, 2, 8, -1 }, { -1, -1, -1, 4, 1, 9, -1, -1, 5 },
+				{ -1, -1, -1, -1, 8, -1, -1, 7, 9 } };
+
+		for (int row = 0; row < NUMB_ROW; row++) {
+			for (int col = 0; col < NUMB_COLUMN; col++) {
+				if (tempBoard[row][col] != -1) {
+
+					switch (tempBoard[row][col]) {
+					case 1:
+						number = 2;
+						break;
+					case 2:
+						number = 4;
+						break;
+					case 3:
+						number = 6;
+						break;
+					case 4:
+						number = 8;
+						break;
+					case 5:
+						number = 9;
+						break;
+					case 6:
+						number = 3;
+						break;
+					case 7:
+						number = 5;
+						break;
+					case 8:
+						number = 7;
+						break;
+					case 9:
+						number = 1;
+						break;
+					}
+
+					textFields[row][col].setText(number + "");
+					textFields[row][col].setStyle(styleGray);
+					textFields[row][col].setEditable(false);
+				}
+			}
+		}
+	}
 }
