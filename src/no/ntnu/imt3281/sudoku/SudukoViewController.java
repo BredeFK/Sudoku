@@ -62,60 +62,66 @@ public class SudukoViewController {
 	@FXML
 	private GridPane gridID;
 
+	/**
+	 * Creates a new game on the board
+	 */
 	@FXML
 	void onNewClick(ActionEvent event) {
 		System.out.println("onNewClick");
 		initializeBoard();
 		Platform.runLater(() -> {
-			fillBoard();
+			newBoard();
 		});
 	}
 
+	/**
+	 * Mirror the board
+	 */
 	@FXML
 	void onMirrorClick(ActionEvent event) {
 		System.out.println("onMirrorClick");
-		initializeBoard();
-		Platform.runLater(() -> {
-			mirrorBoard();
-		});
+		mirrorBoard();
 	}
 
+	/**
+	 * Flips the board upside down
+	 */
 	@FXML
 	void onFlipClick(ActionEvent event) {
 		System.out.println("onFlipClick");
-		initializeBoard();
-		Platform.runLater(() -> {
-			flipBoard();
-		});
+		flipBoard();
 	}
 
+	/**
+	 * Flips the board diagonally from top-left to bottom-right
+	 */
 	@FXML
 	void onBlueFlipClick(ActionEvent event) {
 		System.out.println("onBlueFlipClick");
-		initializeBoard();
-		Platform.runLater(() -> {
-			flipBlueBoard();
-		});
+		flipBlueBoard();
 	}
 
+	/**
+	 * Flips the board diagonally from bottom-left to top-right
+	 */
 	@FXML
 	void onRedFlipClick(ActionEvent event) {
 		System.out.println("onRedFlipClick");
-		initializeBoard();
-		Platform.runLater(() -> {
-			flipRedBoard();
-		});
+		flipRedBoard();
 	}
 
+	/**
+	 * Switches the numbers on the board
+	 */
 	@FXML
 	void onSwitchClick(ActionEvent event) {
 		System.out.println("onSwitchClick");
-		initializeBoard();
-		Platform.runLater(() -> {
-			switchNumbersOnBoard();
-		});
+		switchNumbersOnBoard();
 	}
 
+	/**
+	 * Initializes the board
+	 */
 	@FXML
 	void onClearClick(ActionEvent event) {
 		initializeBoard();
@@ -138,7 +144,6 @@ public class SudukoViewController {
 				// Max width is borderPane width divided by number of boxes minus the gap
 				// between each box and the gap between grid and borderPane
 				textFields[row][col].setMaxWidth((borderPane.getWidth() / NUMB_ROW) - GAP - (NUMB_ROW / 5));
-
 				textFields[row][col].setAlignment(Pos.CENTER);
 				textFields[row][col].setFont(Font.font("Verdana", FontWeight.BLACK, 20));
 				grid.setPadding(new Insets(5, 5, 5, 5));
@@ -170,6 +175,7 @@ public class SudukoViewController {
 						// Input is valid and marked to default colour
 						case 1:
 							textFields[selectedRow][selectedCol].setStyle(styleWhite);
+							checkIfCompleted();
 							break;
 
 						// default should never be triggered, but delete in case
@@ -179,6 +185,15 @@ public class SudukoViewController {
 							});
 							break;
 						}
+					}
+				});
+
+				textFields[row][col].setOnMouseClicked(e -> {
+
+					if (isLocked(selectedRow, selectedCol)) {
+						System.out.println("Låst");
+					} else {
+						System.out.println("Ikke Låst");
 					}
 				});
 			}
@@ -196,7 +211,6 @@ public class SudukoViewController {
 
 		borderPane.setCenter(grid);
 		layoutPane.getChildren().addAll(lines);
-		// fillBoard();
 	}
 
 	/**
@@ -266,7 +280,7 @@ public class SudukoViewController {
 	}
 
 	/**
-	 * Reads the JSONarray
+	 * Reads the JSONarray and converts it to a 2d int array
 	 * 
 	 * @return parsed jsonArray
 	 */
@@ -278,8 +292,28 @@ public class SudukoViewController {
 			StringBuffer sb = new StringBuffer();
 			String line;
 			while ((line = buffer.readLine()) != null) {
-				System.out.println(line);
 				sb.append(line);
+			}
+			// Split string where there aren't a number
+			// Source:
+			// https://stackoverflow.com/questions/29717963/converting-a-stringbuilder-to-integer-values-in-java
+			String[] numbers = sb.toString().split("[^-?1-9]");
+			int[] intNumbers = new int[NUMB_ROW * NUMB_COLUMN];
+			int i = 0;
+
+			// Remove empty spaces and put them in 1d array
+			for (String number : numbers) {
+				if (!number.equals("")) {
+					intNumbers[i++] = Integer.parseInt(number);
+				}
+			}
+
+			// COnvert 1d array to 2d array
+			int index = 0;
+			for (int row = 0; row < NUMB_ROW; row++) {
+				for (int col = 0; col < NUMB_COLUMN; col++) {
+					array[row][col] = intNumbers[index++];
+				}
 			}
 
 		} catch (FileNotFoundException e) {
@@ -294,140 +328,240 @@ public class SudukoViewController {
 		return array;
 	}
 
-	private void fillBoard() {
-		// Bruker denne for å teste om funksjonen fungerer
-		int[][] tempBoard = { { 5, 3, -1, -1, 7, -1, -1, -1, -1 }, { 6, -1, -1, 1, 9, 5, -1, -1, -1 },
-				{ -1, 9, 8, -1, -1, -1, -1, 6, -1 }, { 8, -1, -1, -1, 6, -1, -1, -1, 3 },
-				{ 4, -1, -1, 8, -1, 3, -1, -1, 1 }, { 7, -1, -1, -1, 2, -1, -1, -1, 6 },
-				{ -1, 6, -1, -1, -1, -1, 2, 8, -1 }, { -1, -1, -1, 4, 1, 9, -1, -1, 5 },
-				{ -1, -1, -1, -1, 8, -1, -1, 7, 9 } };
+	/**
+	 * Fill the board with numbers
+	 */
+	private void newBoard() {
+		int[][] temp = getJson();
 
 		for (int row = 0; row < NUMB_ROW; row++) {
 			for (int col = 0; col < NUMB_COLUMN; col++) {
 				// if number is -1 it's empty
-				if (tempBoard[row][col] != -1) {
-					textFields[row][col].setText(tempBoard[row][col] + "");
-					textFields[row][col].setStyle(styleGray);
-					textFields[row][col].setEditable(false);
+				if (temp[row][col] != -1) {
+					lockElement(row, col, temp[row][col] + "");
 				}
 			}
 		}
 	}
 
+	/**
+	 * Unlocks all the elements on the board
+	 */
 	private void initializeBoard() {
 		for (int row = 0; row < NUMB_ROW; row++) {
 			for (int col = 0; col < NUMB_COLUMN; col++) {
-				textFields[row][col].clear();
-				textFields[row][col].setEditable(true);
-				textFields[row][col].setStyle(styleWhite);
+				unlockElement(row, col);
 			}
 		}
 	}
 
+	/**
+	 * Mirror the board
+	 */
 	private void mirrorBoard() {
-		// Bruker denne for å teste om funksjonen fungerer
-		int[][] tempBoard = { { 5, 3, -1, -1, 7, -1, -1, -1, -1 }, { 6, -1, -1, 1, 9, 5, -1, -1, -1 },
-				{ -1, 9, 8, -1, -1, -1, -1, 6, -1 }, { 8, -1, -1, -1, 6, -1, -1, -1, 3 },
-				{ 4, -1, -1, 8, -1, 3, -1, -1, 1 }, { 7, -1, -1, -1, 2, -1, -1, -1, 6 },
-				{ -1, 6, -1, -1, -1, -1, 2, 8, -1 }, { -1, -1, -1, 4, 1, 9, -1, -1, 5 },
-				{ -1, -1, -1, -1, 8, -1, -1, 7, 9 } };
-		int mirrirCol = 0;
+		int[][] temp = convertTo2dInt(textFields);
 
-		for (int row = 0; row < NUMB_ROW; row++) {
-			for (int col = 0; col < NUMB_COLUMN; col++) {
-				// -1 because it goes to from 0 to 8
-				mirrirCol = (NUMB_COLUMN - 1) - col;
-
-				if (tempBoard[row][mirrirCol] != -1) {
-					textFields[row][col].setText(tempBoard[row][mirrirCol] + "");
-					textFields[row][col].setStyle(styleGray);
-					textFields[row][col].setEditable(false);
-				}
-			}
-		}
-	}
-
-	private void flipBoard() {
-		// Bruker denne for å teste om funksjonen fungerer
-		int[][] tempBoard = { { 5, 3, -1, -1, 7, -1, -1, -1, -1 }, { 6, -1, -1, 1, 9, 5, -1, -1, -1 },
-				{ -1, 9, 8, -1, -1, -1, -1, 6, -1 }, { 8, -1, -1, -1, 6, -1, -1, -1, 3 },
-				{ 4, -1, -1, 8, -1, 3, -1, -1, 1 }, { 7, -1, -1, -1, 2, -1, -1, -1, 6 },
-				{ -1, 6, -1, -1, -1, -1, 2, 8, -1 }, { -1, -1, -1, 4, 1, 9, -1, -1, 5 },
-				{ -1, -1, -1, -1, 8, -1, -1, 7, 9 } };
-
-		int mirrirRow = 0;
-
-		for (int row = 0; row < NUMB_ROW; row++) {
-			for (int col = 0; col < NUMB_COLUMN; col++) {
-				// -1 because it goes to from 0 to 8
-				mirrirRow = (NUMB_ROW - 1) - row;
-
-				if (tempBoard[mirrirRow][col] != -1) {
-					textFields[row][col].setText(tempBoard[mirrirRow][col] + "");
-					textFields[row][col].setStyle(styleGray);
-					textFields[row][col].setEditable(false);
-				}
-			}
-		}
-	}
-
-	private void flipBlueBoard() {
-
-	}
-
-	private void flipRedBoard() {
-
-	}
-
-	private void switchNumbersOnBoard() {
-		// Bruker denne for å teste om funksjonen fungerer
-		int number = -1;
-		TextField field;
-		int[][] tempBoard = { { 5, 3, -1, -1, 7, -1, -1, -1, -1 }, { 6, -1, -1, 1, 9, 5, -1, -1, -1 },
-				{ -1, 9, 8, -1, -1, -1, -1, 6, -1 }, { 8, -1, -1, -1, 6, -1, -1, -1, 3 },
-				{ 4, -1, -1, 8, -1, 3, -1, -1, 1 }, { 7, -1, -1, -1, 2, -1, -1, -1, 6 },
-				{ -1, 6, -1, -1, -1, -1, 2, 8, -1 }, { -1, -1, -1, 4, 1, 9, -1, -1, 5 },
-				{ -1, -1, -1, -1, 8, -1, -1, 7, 9 } };
-
-		for (int row = 0; row < NUMB_ROW; row++) {
-			for (int col = 0; col < NUMB_COLUMN; col++) {
-				if (tempBoard[row][col] != -1) {
-
-					switch (tempBoard[row][col]) {
-					case 1:
-						number = 2;
-						break;
-					case 2:
-						number = 4;
-						break;
-					case 3:
-						number = 6;
-						break;
-					case 4:
-						number = 8;
-						break;
-					case 5:
-						number = 9;
-						break;
-					case 6:
-						number = 3;
-						break;
-					case 7:
-						number = 5;
-						break;
-					case 8:
-						number = 7;
-						break;
-					case 9:
-						number = 1;
-						break;
+		initializeBoard();
+		Platform.runLater(() -> {
+			int mirrorCol = 0;
+			for (int row = 0; row < NUMB_ROW; row++) {
+				for (int col = 0; col < NUMB_COLUMN; col++) {
+					// -1 because it goes to from 0 to 8
+					mirrorCol = (NUMB_COLUMN - 1) - col;
+					if (temp[row][mirrorCol] != -1) {
+						lockElement(row, col, temp[row][mirrorCol] + "");
 					}
+				}
+			}
+		});
 
-					textFields[row][col].setText(number + "");
-					textFields[row][col].setStyle(styleGray);
-					textFields[row][col].setEditable(false);
+	}
+
+	/**
+	 * Flip the board upside down
+	 */
+	private void flipBoard() {
+		int[][] temp = convertTo2dInt(textFields);
+
+		initializeBoard();
+		Platform.runLater(() -> {
+			int mirrorRow = 0;
+			for (int row = 0; row < NUMB_ROW; row++) {
+				for (int col = 0; col < NUMB_COLUMN; col++) {
+					// -1 because it goes to from 0 to 8
+					mirrorRow = (NUMB_ROW - 1) - row;
+
+					if (temp[mirrorRow][col] != -1) {
+						lockElement(row, col, temp[mirrorRow][col] + "");
+					}
+				}
+			}
+		});
+	}
+
+	/**
+	 * Flips the board from top-right to bottom-left
+	 */
+	private void flipBlueBoard() {
+		int[][] temp = convertTo2dInt(textFields);
+
+		initializeBoard();
+		Platform.runLater(() -> {
+			int newRow = 0;
+			int newCol = 0;
+			for (int row = 0; row < NUMB_ROW; row++) {
+				for (int col = 0; col < NUMB_COLUMN; col++) {
+					if (temp[col][row] != -1) {
+						lockElement(row, col, temp[col][row] + "");
+					}
+				}
+			}
+		});
+
+	}
+
+	/**
+	 * Flips the board from bottom-left to top-right
+	 */
+	private void flipRedBoard() {
+		int[][] temp = convertTo2dInt(textFields);
+
+		initializeBoard();
+		Platform.runLater(() -> {
+			int newRow = 0;
+			int newCol = 0;
+			for (int row = 0; row < NUMB_ROW; row++) {
+				for (int col = 0; col < NUMB_COLUMN; col++) {
+					newRow = (NUMB_ROW - 1) - row;
+					newCol = (NUMB_COLUMN - 1) - col;
+
+					if (temp[newCol][newRow] != -1) {
+						lockElement(row, col, temp[newCol][newRow] + "");
+					}
+				}
+			}
+		});
+
+	}
+
+	/**
+	 * Switches numbers on the board
+	 */
+	private void switchNumbersOnBoard() {
+		TextField field;
+		int[][] temp = convertTo2dInt(textFields);
+
+		initializeBoard();
+		Platform.runLater(() -> {
+			int number = -1;
+
+			for (int row = 0; row < NUMB_ROW; row++) {
+				for (int col = 0; col < NUMB_COLUMN; col++) {
+					if (temp[row][col] != -1) {
+
+						switch (temp[row][col]) {
+						case 1:
+							number = 2;
+							break;
+						case 2:
+							number = 4;
+							break;
+						case 3:
+							number = 6;
+							break;
+						case 4:
+							number = 8;
+							break;
+						case 5:
+							number = 9;
+							break;
+						case 6:
+							number = 3;
+							break;
+						case 7:
+							number = 5;
+							break;
+						case 8:
+							number = 7;
+							break;
+						case 9:
+							number = 1;
+							break;
+						}
+						lockElement(row, col, number + "");
+					}
+				}
+			}
+		});
+	}
+
+	/**
+	 * @param array from textFields
+	 * 
+	 * @return returnArray converted to int[][]
+	 */
+	private int[][] convertTo2dInt(TextField[][] array) {
+		int[][] returnArray = new int[NUMB_ROW][NUMB_COLUMN];
+		for (int row = 0; row < NUMB_ROW; row++) {
+			for (int col = 0; col < NUMB_COLUMN; col++) {
+				if (array[row][col].getStyle().equals(styleGray)) {
+					returnArray[row][col] = Integer.parseInt(textFields[row][col].getText());
+				} else {
+					returnArray[row][col] = -1;
 				}
 			}
 		}
+		return returnArray;
 	}
+
+	/**
+	 * Checks if the board is completed
+	 */
+	private void checkIfCompleted() {
+		boolean finished = true;
+		for (int row = 0; row < NUMB_ROW; row++) {
+			for (int col = 0; col < NUMB_COLUMN; col++) {
+				if (textFields[row][col].getStyle().equals(styleRed)) {
+					finished = false;
+				} else if (textFields[row][col].getText().isEmpty()) {
+					finished = false;
+				}
+			}
+		}
+		if (finished) {
+			System.out.println("YAY, you completed the board!");
+		}
+	}
+
+	/**
+	 * @param row from textFields
+	 * @param col from textFields
+	 * 
+	 * @return true/false if element is locked
+	 */
+	private boolean isLocked(int row, int col) {
+		return textFields[row][col].getStyle().equals(styleGray);
+	}
+
+	/**
+	 * @param row   from textFields
+	 * @param col   from textFields
+	 * @param value from textFields
+	 */
+	private void lockElement(int row, int col, String value) {
+		textFields[row][col].setText(value);
+		textFields[row][col].setStyle(styleGray);
+		textFields[row][col].setEditable(false);
+	}
+
+	/**
+	 * @param row from textFields
+	 * @param col from textFields
+	 */
+	private void unlockElement(int row, int col) {
+		textFields[row][col].clear();
+		textFields[row][col].setEditable(true);
+		textFields[row][col].setStyle(styleWhite);
+	}
+
 }

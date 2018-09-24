@@ -11,8 +11,6 @@ import javafx.stage.Stage;
  */
 
 public class Sudoku extends Application {
-	private static final int NUMB_ROW = 9;
-	private static final int NUMB_COLUMN = 9;
 
 	public static void main(String[] args) {
 		launch(args);
