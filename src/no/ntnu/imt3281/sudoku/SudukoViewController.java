@@ -19,16 +19,24 @@ public class SudukoViewController {
 
 	@FXML
 	private Pane layoutPane;
-
 	@FXML
 	private BorderPane borderPane;
-
 	@FXML
 	private ToolBar toolBar;
-
 	@FXML
-	private Button btn_New, btn_Mirror, btn_Flip, btn_Blue, btn_Red, btn_Switch, btn_Clear;
-
+	private Button btnNew;
+	@FXML
+	private Button btnMirror;
+	@FXML
+	private Button btnFlip;
+	@FXML
+	private Button btnBlue;
+	@FXML
+	private Button btnRed;
+	@FXML
+	private Button btnSwitch;
+	@FXML
+	private Button btnClear;
 	@FXML
 	private GridPane gridID;
 
@@ -45,7 +53,6 @@ public class SudukoViewController {
 	 */
 	@FXML
 	void onNewClick(ActionEvent event) {
-		System.out.println("onNewClick");
 		sudoku.newBoard();
 	}
 
@@ -54,7 +61,6 @@ public class SudukoViewController {
 	 */
 	@FXML
 	void onMirrorClick(ActionEvent event) {
-		System.out.println("onMirrorClick");
 		sudoku.mirrorBoard();
 	}
 
@@ -63,7 +69,6 @@ public class SudukoViewController {
 	 */
 	@FXML
 	void onFlipClick(ActionEvent event) {
-		System.out.println("onFlipClick");
 		sudoku.flipBoard();
 	}
 
@@ -72,7 +77,6 @@ public class SudukoViewController {
 	 */
 	@FXML
 	void onBlueFlipClick(ActionEvent event) {
-		System.out.println("onBlueFlipClick");
 		sudoku.flipBlueBoard();
 	}
 
@@ -81,7 +85,6 @@ public class SudukoViewController {
 	 */
 	@FXML
 	void onRedFlipClick(ActionEvent event) {
-		System.out.println("onRedFlipClick");
 		sudoku.flipRedBoard();
 	}
 
@@ -90,16 +93,14 @@ public class SudukoViewController {
 	 */
 	@FXML
 	void onSwitchClick(ActionEvent event) {
-		System.out.println("onSwitchClick");
 		sudoku.switchNumbersOnBoard();
 	}
 
 	/**
-	 * Initializes the board
+	 * Initialize the board
 	 */
 	@FXML
 	void onClearClick(ActionEvent event) {
-		System.out.println("onClearClick");
 		sudoku.initializeBoard();
 	}
 }

@@ -6,6 +6,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -36,6 +38,7 @@ public class Sudoku extends Application {
 	private static final int GAP = 10;
 	private static final int NUMB_COLUMN = NUMB_ROW;
 	private static final int SUB_GRID = NUMB_ROW / 3;
+	private static final Logger logger = Logger.getLogger(Sudoku.class.getName());
 	private TextField[][] textFields;
 	// Source:
 	// https://www.programcreek.com/java-api-examples/?api=javafx.scene.layout.Background
@@ -79,7 +82,7 @@ public class Sudoku extends Application {
 
 				// Max width is borderPane width divided by number of boxes minus the gap
 				// between each box and the gap between grid and borderPane
-				textFields[row][col].setMaxWidth((borderPane.getWidth() / NUMB_ROW) - GAP - (NUMB_ROW / 5));
+				textFields[row][col].setMaxWidth((borderPane.getWidth() / NUMB_ROW) - GAP - ((long) NUMB_ROW / 5.0f));
 				textFields[row][col].setAlignment(Pos.CENTER);
 				textFields[row][col].setFont(Font.font("Verdana", FontWeight.BLACK, 20));
 				grid.setPadding(new Insets(5, 5, 5, 5));
@@ -129,7 +132,7 @@ public class Sudoku extends Application {
 					public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue,
 							Boolean newValue) {
 						if (isLocked(selectedRow, selectedCol)) {
-							System.out.println("Låst");
+							logger.log(Level.WARNING, "This element is locked!");
 						}
 					}
 				});
@@ -137,10 +140,10 @@ public class Sudoku extends Application {
 			}
 		}
 
-		// I have to have -4 on the vertical and +4 on the horizontal for some reason
+		// I have to have -13 on the vertical and +4 on the horizontal for some reason
 		// this works and I don't know why
-		lines[0] = new Line((borderPane.getWidth() - 4) / 3, 0, (borderPane.getWidth() - 4) / 3, gridHeight);
-		lines[1] = new Line((borderPane.getWidth() - 4) / 1.5f, 0, (borderPane.getWidth() - 4) / 1.5f, gridHeight);
+		lines[0] = new Line((borderPane.getWidth() - 13) / 3, 0, (borderPane.getWidth() - 13) / 3, gridHeight);
+		lines[1] = new Line((borderPane.getWidth() - 13) / 1.5f, 0, (borderPane.getWidth() - 13) / 1.5f, gridHeight);
 		lines[2] = new Line(0, (gridHeight + 4) / 3, borderPane.getWidth(), (gridHeight + 4) / 3);
 		lines[3] = new Line(0, (gridHeight + 4) / 1.5f, borderPane.getWidth(), (gridHeight + 4) / 1.5f);
 
@@ -169,32 +172,20 @@ public class Sudoku extends Application {
 	 */
 	private int isValid(int row, int col, String value) {
 
-		if (value.isEmpty()) {
-			return -1;
-		} else if (!value.matches("\\d")) {
-			System.out.println("Not number");
-			return -1;
-		} else if (Integer.parseInt(value) < 1 || Integer.parseInt(value) > 9) {
-			System.out.println("Not 1-9");
+		if (value.isEmpty() || !value.matches("\\d") || (Integer.parseInt(value) < 1 || Integer.parseInt(value) > 9)) {
 			return -1;
 		} else {
 			// Check row
 			for (int i = 0; i < NUMB_COLUMN; i++) {
-				if (col != i) {
-					if (textFields[row][i].getText().equals(value)) {
-						System.out.println("Row: nei");
-						return 0;
-					}
+				if (textFields[row][i].getText().equals(value) && i != col) {
+					return 0;
 				}
 			}
 
 			// Check column
 			for (int j = 0; j < NUMB_ROW; j++) {
-				if (row != j) {
-					if (textFields[j][col].getText().equals(value)) {
-						System.out.println("Col: nei");
-						return 0;
-					}
+				if (textFields[j][col].getText().equals(value) && j != row) {
+					return 0;
 				}
 			}
 
@@ -207,11 +198,8 @@ public class Sudoku extends Application {
 
 			for (int r = startRow; r < endRow; r++) {
 				for (int c = startCol; c < endCol; c++) {
-					if (r != row && c != col) {
-						if (textFields[r][c].getText().equals(value)) {
-							System.out.println("SubGrid: nei");
-							return 0;
-						}
+					if (textFields[r][c].getText().equals(value) && r != row && c != col) {
+						return 0;
 					}
 				}
 			}
@@ -230,14 +218,12 @@ public class Sudoku extends Application {
 	private int[][] getJson() {
 		int[][] array = new int[NUMB_ROW][NUMB_COLUMN];
 
-		try {
-			BufferedReader buffer = new BufferedReader(new FileReader("board.json"));
-			StringBuffer sb = new StringBuffer();
+		try (BufferedReader buffer = new BufferedReader(new FileReader("board.json"))) {
+			StringBuilder sb = new StringBuilder();
 			String line;
 			while ((line = buffer.readLine()) != null) {
 				sb.append(line);
 			}
-			buffer.close();
 			// Split string where there aren't a number
 			String[] numbers = sb.toString().split("[^-?1-9]");
 			int[] intNumbers = new int[NUMB_ROW * NUMB_COLUMN];
@@ -259,12 +245,11 @@ public class Sudoku extends Application {
 			}
 
 		} catch (FileNotFoundException e) {
-			System.out.println("File not found");
-			e.printStackTrace();
-
+			array = null;
+			logger.log(Level.WARNING, String.format("File not found: %s%n", e.getLocalizedMessage()));
 		} catch (IOException e) {
-			System.out.println("IOException");
-			e.printStackTrace();
+			array = null;
+			logger.log(Level.WARNING, String.format("IOException: %s%n", e.getLocalizedMessage()));
 		}
 
 		return array;
@@ -275,18 +260,19 @@ public class Sudoku extends Application {
 	 */
 	public void newBoard() {
 		int[][] temp = getJson();
-
-		initializeBoard();
-		Platform.runLater(() -> {
-			for (int row = 0; row < NUMB_ROW; row++) {
-				for (int col = 0; col < NUMB_COLUMN; col++) {
-					// if number is -1 it's empty
-					if (temp[row][col] != -1) {
-						lockElement(row, col, temp[row][col] + "");
+		if (temp != null) {
+			initializeBoard();
+			Platform.runLater(() -> {
+				for (int row = 0; row < NUMB_ROW; row++) {
+					for (int col = 0; col < NUMB_COLUMN; col++) {
+						// if number is -1 it's empty
+						if (temp[row][col] != -1) {
+							lockElement(row, col, temp[row][col] + "");
+						}
 					}
 				}
-			}
-		});
+			});
+		}
 	}
 
 	/**
@@ -430,6 +416,10 @@ public class Sudoku extends Application {
 						case 9:
 							number = numbers.get(8);
 							break;
+						default:
+							// This should never happen
+							number = 0;
+							break;
 						}
 						lockElement(row, col, number + "");
 					}
@@ -464,15 +454,13 @@ public class Sudoku extends Application {
 		boolean finished = true;
 		for (int row = 0; row < NUMB_ROW; row++) {
 			for (int col = 0; col < NUMB_COLUMN; col++) {
-				if (textFields[row][col].getStyle().equals(styleRed)) {
-					finished = false;
-				} else if (textFields[row][col].getText().isEmpty()) {
+				if (textFields[row][col].getStyle().equals(styleRed) || textFields[row][col].getText().isEmpty()) {
 					finished = false;
 				}
 			}
 		}
 		if (finished) {
-			System.out.println("YAY, you completed the board!");
+			logger.info("YAY, you completed the board!");
 		}
 	}
 
@@ -527,12 +515,9 @@ public class Sudoku extends Application {
 		ArrayList<Integer> numbers = new ArrayList<>();
 		Random rnd = new Random(System.currentTimeMillis());
 		int index = 0;
-		int sum = 0;
 		while (numbers.size() < NUMB_ROW) {
 			int number = rnd.nextInt(NUMB_ROW) + 1;
-			sum++;
 			if (!numbers.contains(number) && number != (index + 1)) {
-				System.out.println("match: " + number + " " + (index + 1));
 				numbers.add(index++, number);
 
 			} else if (index == (NUMB_ROW - 1) && number == NUMB_ROW && !numbers.contains(NUMB_ROW)) {
@@ -544,12 +529,8 @@ public class Sudoku extends Application {
 				int temp = numbers.get(index - 1);
 				numbers.add(index - 1, number);
 				numbers.add(index++, temp);
-				System.out.printf("---FIX---\nmatch: %d %d\nmatch: %d %d\n", number, (index - 1), temp, index);
 			}
 		}
-		System.out.println("int's generated: " + sum);
-
 		return numbers;
 	}
-
 }
