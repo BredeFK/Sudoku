@@ -250,7 +250,7 @@ public class Sudoku extends Application {
 				}
 			}
 
-			// COnvert 1d array to 2d array
+			// Convert 1d array to 2d array
 			int index = 0;
 			for (int row = 0; row < NUMB_ROW; row++) {
 				for (int col = 0; col < NUMB_COLUMN; col++) {
@@ -393,7 +393,6 @@ public class Sudoku extends Application {
 	public void switchNumbersOnBoard() {
 		int[][] temp = convertTo2dInt(textFields);
 		ArrayList<Integer> numbers = getRandomNumbers();
-		boolean list[][] = new boolean[9][9];
 
 		initializeBoard();
 		Platform.runLater(() -> {
