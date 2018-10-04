@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -104,6 +105,7 @@ public class Sudoku extends Application {
 						case -1:
 							Platform.runLater(() -> {
 								textFields[selectedRow][selectedCol].clear();
+								textFields[selectedRow][selectedCol].setStyle(styleWhite );
 							});
 							break;
 						// Input field gets marked red and not deleted
@@ -205,6 +207,39 @@ public class Sudoku extends Application {
 			}
 			return 1;
 		}
+	}
+	
+	private Iterator<String> getIteratorRow(int row) {
+		ArrayList<String> arrayListRow = new ArrayList<>();
+		for(int col = 0; col < NUMB_COLUMN; col++) {
+			arrayListRow.add(textFields[row][col].getText());
+		}
+		return arrayListRow.iterator();
+	}
+	
+	private Iterator<String> getIteratorCol(int col) {
+		ArrayList<String> arrayListCol = new ArrayList<>();
+		for(int row = 0; row < NUMB_ROW; row++) {
+			arrayListCol.add(textFields[row][col].getText());
+		}
+		return arrayListCol.iterator();
+	}
+	
+	private Iterator<String> getIteratorBox(int row, int col) {
+		ArrayList<String> arrayListBox = new ArrayList<>();
+		int startRow = (row / SUB_GRID) * SUB_GRID;
+		int startCol = (col / SUB_GRID) * SUB_GRID;
+
+		int endRow = startRow + SUB_GRID;
+		int endCol = startCol + SUB_GRID;
+		
+		for (int r = startRow; r < endRow; r++) {
+			for (int c = startCol; c < endCol; c++) {
+				arrayListBox.add(textFields[r][c].getText());
+			}
+		}
+		
+		return arrayListBox.iterator();
 	}
 
 	/**
