@@ -382,46 +382,11 @@ public class Sudoku extends Application {
 
 		initializeBoard();
 		Platform.runLater(() -> {
-			int number = -1;
 
 			for (int row = 0; row < NUMB_ROW; row++) {
 				for (int col = 0; col < NUMB_COLUMN; col++) {
 					if (temp[row][col] != -1) {
-
-						switch (temp[row][col]) {
-						case 1:
-							number = numbers.get(0);
-							break;
-						case 2:
-							number = numbers.get(1);
-							break;
-						case 3:
-							number = numbers.get(2);
-							break;
-						case 4:
-							number = numbers.get(3);
-							break;
-						case 5:
-							number = numbers.get(4);
-							break;
-						case 6:
-							number = numbers.get(5);
-							break;
-						case 7:
-							number = numbers.get(6);
-							break;
-						case 8:
-							number = numbers.get(7);
-							break;
-						case 9:
-							number = numbers.get(8);
-							break;
-						default:
-							// This should never happen
-							number = 0;
-							break;
-						}
-						lockElement(row, col, number + "");
+						lockElement(row, col, numbers.get(temp[row][col] - 1) + "");
 					}
 				}
 			}
