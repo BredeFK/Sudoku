@@ -2,6 +2,6 @@
 .project
 .settings
 target
-bin
+bin/
 /bin/
 /target/
