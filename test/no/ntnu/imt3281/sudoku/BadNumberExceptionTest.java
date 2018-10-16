@@ -1,5 +1,8 @@
 package no.ntnu.imt3281.sudoku;
 
+/**
+ * @author Brede Fritjof Klausen
+ */
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 

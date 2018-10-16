@@ -1,5 +1,8 @@
 package no.ntnu.imt3281.sudoku;
 
+/**
+ * @author Brede Fritjof Klausen
+ */
 public class BadNumberException extends Exception {
 
 	private static final long serialVersionUID = 409007870227134841L;

@@ -1,5 +1,8 @@
 package no.ntnu.imt3281.sudoku;
 
+/**
+ * @author Brede Fritjof Klausen
+ */
 public class ElementIsLockedException extends Exception {
 
 	private static final long serialVersionUID = -1122364685372394575L;

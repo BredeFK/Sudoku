@@ -1,5 +1,9 @@
 package no.ntnu.imt3281.sudoku;
 
+/**
+ * @author Brede Fritjof Klausen
+ */
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -29,10 +33,6 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
-/**
- * @author Brede Fritjof Klausen
- */
-
 public class Sudoku extends Application {
 
 	private static final int NUMB_ROW = 9;
@@ -52,6 +52,7 @@ public class Sudoku extends Application {
 	 */
 	public Sudoku() {
 		textFields = new TextField[NUMB_ROW][NUMB_COLUMN];
+
 	}
 
 	public static void main(String[] args) {

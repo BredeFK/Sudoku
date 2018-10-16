@@ -1,5 +1,11 @@
 package no.ntnu.imt3281.sudoku;
 
+import static org.junit.Assert.assertEquals;
+
+/**
+ * @author Brede Fritjof Klausen
+ */
+
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -20,7 +26,11 @@ public class SudokuTest {
 
 	@Test
 	public void testGetElement() {
+		SudukoViewController controller = new SudukoViewController();
 
+		String result = sudoku.getElement(0, 0);
+		assertEquals("", result);
+		System.out.println("Result is: " + result);
 	}
 
 	@Test

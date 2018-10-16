@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
+<!-- Author: Brede Fritjof Klausen -->
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ToolBar?>
@@ -15,13 +15,13 @@
          <bottom>
             <ToolBar fx:id="toolBar" prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                <items>
-                  <Button fx:id="btn_New" mnemonicParsing="false" onAction="#onNewClick" text="New Game" />
-                  <Button fx:id="btn_Mirror" mnemonicParsing="false" onAction="#onMirrorClick" text="Mirror" />
-                  <Button fx:id="btn_Flip" mnemonicParsing="false" onAction="#onFlipClick" text="Flip" />
-                  <Button fx:id="btn_Blue" mnemonicParsing="false" onAction="#onBlueFlipClick" text="Blue" />
-                  <Button fx:id="btn_Red" mnemonicParsing="false" onAction="#onRedFlipClick" text="Red" />
-                  <Button fx:id="btn_Switch" mnemonicParsing="false" onAction="#onSwitchClick" text="Switch Numbers" />
-                  <Button fx:id="btn_Clear" mnemonicParsing="false" onAction="#onClearClick" text="Clear" />
+                  <Button fx:id="btnNew" mnemonicParsing="false" onAction="#onNewClick" text="New Game" />
+                  <Button fx:id="btnMirror" mnemonicParsing="false" onAction="#onMirrorClick" text="Mirror" />
+                  <Button fx:id="btnFlip" mnemonicParsing="false" onAction="#onFlipClick" text="Flip" />
+                  <Button fx:id="btnBlue" mnemonicParsing="false" onAction="#onBlueFlipClick" text="Blue" />
+                  <Button fx:id="btnRed" mnemonicParsing="false" onAction="#onRedFlipClick" text="Red" />
+                  <Button fx:id="btnSwitch" mnemonicParsing="false" onAction="#onSwitchClick" text="Switch Numbers" />
+                  <Button fx:id="btnClear" mnemonicParsing="false" onAction="#onClearClick" text="Clear" />
                </items>
             </ToolBar>
          </bottom>

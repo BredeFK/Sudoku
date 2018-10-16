@@ -1,5 +1,8 @@
 package no.ntnu.imt3281.sudoku;
 
+/**
+ * @author Brede Fritjof Klausen
+ */
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -8,10 +11,6 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
-
-/**
- * @author Brede Fritjof Klausen
- */
 
 public class SudukoViewController {
 
@@ -40,9 +39,16 @@ public class SudukoViewController {
 	@FXML
 	private GridPane gridID;
 
+	/**
+	 * Generates the board <br>
+	 * <br>
+	 * 
+	 * Source for Platform.runLater:
+	 * {@link https://stackoverflow.com/a/32893573/8883030}
+	 */
 	public SudukoViewController() {
 		sudoku = new Sudoku();
-		// Source for Platform.runLater: https://stackoverflow.com/a/32893573/8883030
+
 		Platform.runLater(() -> {
 			sudoku.generateAndCheck(borderPane, toolBar, layoutPane);
 		});
@@ -50,6 +56,8 @@ public class SudukoViewController {
 
 	/**
 	 * Creates a new game on the board
+	 * 
+	 * @param event ActionEvent
 	 */
 	@FXML
 	void onNewClick(ActionEvent event) {
@@ -58,6 +66,8 @@ public class SudukoViewController {
 
 	/**
 	 * Mirror the board
+	 * 
+	 * @param event ActionEvent
 	 */
 	@FXML
 	void onMirrorClick(ActionEvent event) {
@@ -66,6 +76,8 @@ public class SudukoViewController {
 
 	/**
 	 * Flips the board upside down
+	 * 
+	 * @param event ActionEvent
 	 */
 	@FXML
 	void onFlipClick(ActionEvent event) {
@@ -74,6 +86,8 @@ public class SudukoViewController {
 
 	/**
 	 * Flips the board diagonally from top-left to bottom-right
+	 * 
+	 * @param event ActionEvent
 	 */
 	@FXML
 	void onBlueFlipClick(ActionEvent event) {
@@ -82,6 +96,8 @@ public class SudukoViewController {
 
 	/**
 	 * Flips the board diagonally from bottom-left to top-right
+	 * 
+	 * @param event ActionEvent
 	 */
 	@FXML
 	void onRedFlipClick(ActionEvent event) {
@@ -90,6 +106,8 @@ public class SudukoViewController {
 
 	/**
 	 * Switches the numbers on the board
+	 * 
+	 * @param event ActionEvent
 	 */
 	@FXML
 	void onSwitchClick(ActionEvent event) {
@@ -98,6 +116,8 @@ public class SudukoViewController {
 
 	/**
 	 * Initialize the board
+	 * 
+	 * @param event ActionEvent
 	 */
 	@FXML
 	void onClearClick(ActionEvent event) {
