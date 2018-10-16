@@ -104,8 +104,7 @@ public class Sudoku extends Application {
 						// Input gets deleted
 						case -1:
 							Platform.runLater(() -> {
-								textFields[selectedRow][selectedCol].clear();
-								textFields[selectedRow][selectedCol].setStyle(styleWhite );
+								unlockElement(selectedRow, selectedCol);
 							});
 							break;
 						// Input field gets marked red and not deleted
@@ -128,17 +127,14 @@ public class Sudoku extends Application {
 						}
 					}
 				});
-
-				textFields[row][col].focusedProperty().addListener(new ChangeListener<Boolean>() {
-					@Override
-					public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue,
-							Boolean newValue) {
-						if (isLocked(selectedRow, selectedCol)) {
-							logger.log(Level.WARNING, "This element is locked!");
-						}
-					}
-				});
-
+				/*
+				 * textFields[row][col].focusedProperty().addListener(new
+				 * ChangeListener<Boolean>() {
+				 * 
+				 * @Override public void changed(ObservableValue<? extends Boolean> observable,
+				 * Boolean oldValue, Boolean newValue) { if (isLocked(selectedRow, selectedCol))
+				 * { logger.log(Level.WARNING, "This element is locked!"); } } });
+				 */
 			}
 		}
 
@@ -174,57 +170,73 @@ public class Sudoku extends Application {
 	 */
 	private int isValid(int row, int col, String value) {
 
+		// Check if empty, is not a number and number is between 1 and 9
 		if (value.isEmpty() || !value.matches("\\d") || (Integer.parseInt(value) < 1 || Integer.parseInt(value) > 9)) {
 			return -1;
-		} else {
-			// Check row
-			for (int i = 0; i < NUMB_COLUMN; i++) {
-				if (textFields[row][i].getText().equals(value) && i != col) {
-					return 0;
-				}
-			}
-
-			// Check column
-			for (int j = 0; j < NUMB_ROW; j++) {
-				if (textFields[j][col].getText().equals(value) && j != row) {
-					return 0;
-				}
-			}
-
-			// Check sub-grid
-			int startRow = (row / SUB_GRID) * SUB_GRID;
-			int startCol = (col / SUB_GRID) * SUB_GRID;
-
-			int endRow = startRow + SUB_GRID;
-			int endCol = startCol + SUB_GRID;
-
-			for (int r = startRow; r < endRow; r++) {
-				for (int c = startCol; c < endCol; c++) {
-					if (textFields[r][c].getText().equals(value) && r != row && c != col) {
-						return 0;
-					}
-				}
-			}
-			return 1;
 		}
+
+		// Check row
+		int i = 0;
+		Iterator<String> rowIterator = getIteratorRow(row);
+		while (rowIterator.hasNext()) {
+			if (rowIterator.next().equals(value) && i != col) {
+				return 0;
+			}
+			i++;
+		}
+
+		// Check column
+		i = 0;
+		Iterator<String> colIterator = getIteratorCol(col);
+		while (colIterator.hasNext()) {
+			if (colIterator.next().equals(value) && i != row) {
+				return 0;
+			}
+			i++;
+		}
+
+		// Check sub-grid
+		int startRow = (row / SUB_GRID) * SUB_GRID;
+		int startCol = (col / SUB_GRID) * SUB_GRID;
+		int j;
+		Iterator<String> boxIterator = getIteratorBox(row, col);
+		for (i = startRow; i < startRow + SUB_GRID; i++) {
+			for (j = startCol; j < startCol + SUB_GRID; j++) {
+				if (boxIterator.next().equals(value) && i != row && j != col) {
+					return 0;
+				}
+			}
+		}
+
+		// Input is valid
+		return 1;
 	}
-	
+
+	/**
+	 * Returns an iterator object for the row
+	 */
 	private Iterator<String> getIteratorRow(int row) {
 		ArrayList<String> arrayListRow = new ArrayList<>();
-		for(int col = 0; col < NUMB_COLUMN; col++) {
+		for (int col = 0; col < NUMB_COLUMN; col++) {
 			arrayListRow.add(textFields[row][col].getText());
 		}
 		return arrayListRow.iterator();
 	}
-	
+
+	/**
+	 * Returns an iterator object for the column
+	 */
 	private Iterator<String> getIteratorCol(int col) {
 		ArrayList<String> arrayListCol = new ArrayList<>();
-		for(int row = 0; row < NUMB_ROW; row++) {
+		for (int row = 0; row < NUMB_ROW; row++) {
 			arrayListCol.add(textFields[row][col].getText());
 		}
 		return arrayListCol.iterator();
 	}
-	
+
+	/**
+	 * Returns an iterator object for the sub-grid box
+	 */
 	private Iterator<String> getIteratorBox(int row, int col) {
 		ArrayList<String> arrayListBox = new ArrayList<>();
 		int startRow = (row / SUB_GRID) * SUB_GRID;
@@ -232,13 +244,13 @@ public class Sudoku extends Application {
 
 		int endRow = startRow + SUB_GRID;
 		int endCol = startCol + SUB_GRID;
-		
+
 		for (int r = startRow; r < endRow; r++) {
 			for (int c = startCol; c < endCol; c++) {
 				arrayListBox.add(textFields[r][c].getText());
 			}
 		}
-		
+
 		return arrayListBox.iterator();
 	}
 
@@ -509,7 +521,7 @@ public class Sudoku extends Application {
 	 * Source for no no duplicates:
 	 * {@link https://stackoverflow.com/a/10136855/8883030}
 	 * 
-	 * @return ArrayList<Integer> with random numbers 1-9 (no dups)
+	 * @return ArrayList<Integer> with random numbers 1-9 (no duplications)
 	 */
 	private ArrayList<Integer> getRandomNumbers() {
 		ArrayList<Integer> numbers = new ArrayList<>();
