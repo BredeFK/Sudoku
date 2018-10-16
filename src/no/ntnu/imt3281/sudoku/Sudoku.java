@@ -70,7 +70,7 @@ public class Sudoku extends Application {
 	/**
 	 * Generates the board and checks if the input is valid
 	 */
-	public void generateAndCheck(BorderPane borderPane, ToolBar toolBar, Pane layoutPane) {
+	protected void generateAndCheck(BorderPane borderPane, ToolBar toolBar, Pane layoutPane) {
 		GridPane grid = new GridPane();
 		double gridHeight = borderPane.getHeight() - toolBar.getHeight();
 		Line[] lines = new Line[4];
@@ -115,14 +115,6 @@ public class Sudoku extends Application {
 						}
 					}
 				});
-				/*
-				 * textFields[row][col].focusedProperty().addListener(new
-				 * ChangeListener<Boolean>() {
-				 * 
-				 * @Override public void changed(ObservableValue<? extends Boolean> observable,
-				 * Boolean oldValue, Boolean newValue) { if (isLocked(selectedRow, selectedCol))
-				 * { logger.log(Level.WARNING, "This element is locked!"); } } });
-				 */
 			}
 		}
 
@@ -141,15 +133,34 @@ public class Sudoku extends Application {
 	}
 
 	/**
+	 * @param row
+	 * @param col
+	 */
+	protected String getElement(int row, int col) {
+		return textFields[row][col].getText();
+	}
+
+	/**
+	 * @param row
+	 * @param col
+	 * @param value
+	 * @throws Exception
+	 */
+	protected void setElement(int row, int col, int value) throws ElementIsLockedException {
+		if (!isLocked(row, col)) {
+			textFields[row][col].setText(value + "");
+		} else {
+			throw new ElementIsLockedException(row, col);
+		}
+	}
+
+	/**
 	 * Checks if the input is valid
 	 * <p>
 	 * Checks the row, column and sub grid box if the input is valid. Throws
 	 * BadNumberException if the number is already on the board, false if it's
 	 * illegal input and true if it's legal input and the right number
 	 * </p>
-	 * 
-	 * Source for checking sub-grid: {@link https://www.baeldung.com/java-sudoku}
-	 * 
 	 * 
 	 * @param row   from changed textField
 	 * @param col   from changed textField
@@ -158,7 +169,7 @@ public class Sudoku extends Application {
 	 * @return boolean true or false
 	 * @throws BadNumberException if number already exists
 	 */
-	private boolean isValid(int row, int col, String value) throws BadNumberException {
+	protected boolean isValid(int row, int col, String value) throws BadNumberException {
 
 		// Check if empty, is not a number and number is between 1 and 9
 		if (value.isEmpty() || !value.matches("\\d") || (Integer.parseInt(value) < 1 || Integer.parseInt(value) > 9)) {
@@ -204,8 +215,12 @@ public class Sudoku extends Application {
 
 	/**
 	 * Returns an iterator object for the row
+	 * 
+	 * @param row
+	 * 
+	 * @return Iterator<String>
 	 */
-	private Iterator<String> getIteratorRow(int row) {
+	protected Iterator<String> getIteratorRow(int row) {
 		ArrayList<String> arrayListRow = new ArrayList<>();
 		for (int col = 0; col < NUMB_COLUMN; col++) {
 			arrayListRow.add(textFields[row][col].getText());
@@ -215,8 +230,12 @@ public class Sudoku extends Application {
 
 	/**
 	 * Returns an iterator object for the column
+	 * 
+	 * @param col
+	 * 
+	 * @return Iterator<String>
 	 */
-	private Iterator<String> getIteratorCol(int col) {
+	protected Iterator<String> getIteratorCol(int col) {
 		ArrayList<String> arrayListCol = new ArrayList<>();
 		for (int row = 0; row < NUMB_ROW; row++) {
 			arrayListCol.add(textFields[row][col].getText());
@@ -226,8 +245,16 @@ public class Sudoku extends Application {
 
 	/**
 	 * Returns an iterator object for the sub-grid box
+	 * 
+	 * Source for checking sub-grid: {@link https://www.baeldung.com/java-sudoku}
+	 * 
+	 * @param row
+	 * @param col
+	 * 
+	 * @return Iterator<String>
+	 * 
 	 */
-	private Iterator<String> getIteratorBox(int row, int col) {
+	protected Iterator<String> getIteratorBox(int row, int col) {
 		ArrayList<String> arrayListBox = new ArrayList<>();
 		int startRow = (row / SUB_GRID) * SUB_GRID;
 		int startCol = (col / SUB_GRID) * SUB_GRID;
@@ -252,7 +279,7 @@ public class Sudoku extends Application {
 	 * 
 	 * @return parsed jsonArray
 	 */
-	private int[][] getJson() {
+	protected int[][] getJson() {
 		int[][] array = new int[NUMB_ROW][NUMB_COLUMN];
 
 		try (BufferedReader buffer = new BufferedReader(new FileReader("board.json"))) {
@@ -283,10 +310,10 @@ public class Sudoku extends Application {
 
 		} catch (FileNotFoundException e) {
 			array = null;
-			logger.log(Level.WARNING, String.format("File not found: %s%n", e.getLocalizedMessage()));
+			logger.log(Level.WARNING, String.format("File not found: %s%n", e.getMessage()));
 		} catch (IOException e) {
 			array = null;
-			logger.log(Level.WARNING, String.format("IOException: %s%n", e.getLocalizedMessage()));
+			logger.log(Level.WARNING, String.format("IOException: %s%n", e.getMessage()));
 		}
 
 		return array;
@@ -295,8 +322,9 @@ public class Sudoku extends Application {
 	/**
 	 * Fill the board with numbers
 	 */
-	public void newBoard() {
+	protected void newBoard() {
 		int[][] temp = getJson();
+
 		if (temp != null) {
 			initializeBoard();
 			Platform.runLater(() -> {
@@ -315,7 +343,7 @@ public class Sudoku extends Application {
 	/**
 	 * Unlocks all the elements on the board
 	 */
-	public void initializeBoard() {
+	protected void initializeBoard() {
 		for (int row = 0; row < NUMB_ROW; row++) {
 			for (int col = 0; col < NUMB_COLUMN; col++) {
 				unlockElement(row, col);
@@ -326,7 +354,7 @@ public class Sudoku extends Application {
 	/**
 	 * Mirror the board
 	 */
-	public void mirrorBoard() {
+	protected void mirrorBoard() {
 		int[][] temp = convertTo2dInt(textFields);
 
 		initializeBoard();
@@ -348,7 +376,7 @@ public class Sudoku extends Application {
 	/**
 	 * Flip the board upside down
 	 */
-	public void flipBoard() {
+	protected void flipBoard() {
 		int[][] temp = convertTo2dInt(textFields);
 
 		initializeBoard();
@@ -370,7 +398,7 @@ public class Sudoku extends Application {
 	/**
 	 * Flips the board from top-right to bottom-left
 	 */
-	public void flipBlueBoard() {
+	protected void flipBlueBoard() {
 		int[][] temp = convertTo2dInt(textFields);
 
 		initializeBoard();
@@ -389,7 +417,7 @@ public class Sudoku extends Application {
 	/**
 	 * Flips the board from bottom-left to top-right
 	 */
-	public void flipRedBoard() {
+	protected void flipRedBoard() {
 		int[][] temp = convertTo2dInt(textFields);
 
 		initializeBoard();
@@ -413,7 +441,7 @@ public class Sudoku extends Application {
 	/**
 	 * Switches numbers on the board
 	 */
-	public void switchNumbersOnBoard() {
+	protected void switchNumbersOnBoard() {
 		int[][] temp = convertTo2dInt(textFields);
 		ArrayList<Integer> numbers = getRandomNumbers();
 
@@ -435,7 +463,7 @@ public class Sudoku extends Application {
 	 * 
 	 * @return returnArray converted to int[][]
 	 */
-	private int[][] convertTo2dInt(TextField[][] array) {
+	protected int[][] convertTo2dInt(TextField[][] array) {
 		int[][] returnArray = new int[NUMB_ROW][NUMB_COLUMN];
 		for (int row = 0; row < NUMB_ROW; row++) {
 			for (int col = 0; col < NUMB_COLUMN; col++) {
@@ -452,7 +480,7 @@ public class Sudoku extends Application {
 	/**
 	 * Checks if the board is completed
 	 */
-	private void checkIfCompleted() {
+	protected void checkIfCompleted() {
 		boolean finished = true;
 		for (int row = 0; row < NUMB_ROW; row++) {
 			for (int col = 0; col < NUMB_COLUMN; col++) {
@@ -472,7 +500,7 @@ public class Sudoku extends Application {
 	 * 
 	 * @return true/false if element is locked
 	 */
-	private boolean isLocked(int row, int col) {
+	protected boolean isLocked(int row, int col) {
 		return textFields[row][col].getStyle().equals(styleGray);
 	}
 
@@ -481,7 +509,7 @@ public class Sudoku extends Application {
 	 * @param col   from textFields
 	 * @param value from textFields
 	 */
-	private void lockElement(int row, int col, String value) {
+	protected void lockElement(int row, int col, String value) {
 		textFields[row][col].setText(value);
 		textFields[row][col].setStyle(styleGray);
 		textFields[row][col].setEditable(false);
@@ -491,7 +519,7 @@ public class Sudoku extends Application {
 	 * @param row from textFields
 	 * @param col from textFields
 	 */
-	private void unlockElement(int row, int col) {
+	protected void unlockElement(int row, int col) {
 		textFields[row][col].clear();
 		textFields[row][col].setEditable(true);
 		textFields[row][col].setStyle(styleWhite);
@@ -513,7 +541,7 @@ public class Sudoku extends Application {
 	 * 
 	 * @return ArrayList<Integer> with random numbers 1-9 (no duplications)
 	 */
-	private ArrayList<Integer> getRandomNumbers() {
+	protected ArrayList<Integer> getRandomNumbers() {
 		ArrayList<Integer> numbers = new ArrayList<>();
 		Random rnd = new Random(System.currentTimeMillis());
 		int index = 0;
