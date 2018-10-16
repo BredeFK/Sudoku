@@ -133,8 +133,10 @@ public class Sudoku extends Application {
 	}
 
 	/**
-	 * @param row
-	 * @param col
+	 * @param row int
+	 * @param col int
+	 * 
+	 * @return element String
 	 */
 	protected String getElement(int row, int col) {
 		return textFields[row][col].getText();
@@ -489,6 +491,7 @@ public class Sudoku extends Application {
 				}
 			}
 		}
+		// TODO : write this on the fxml application and not in the logger
 		if (finished) {
 			logger.info("YAY, you completed the board!");
 		}

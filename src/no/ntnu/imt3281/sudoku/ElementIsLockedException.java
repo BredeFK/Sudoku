@@ -17,7 +17,7 @@ public class ElementIsLockedException extends Exception {
 
 	@Override
 	public String getMessage() {
-		return String.format("LockedElement Exception: Element(%d,%d) is locked!", row, col);
+		return String.format("LockedElement Exception: Element(%d, %d) is locked!", row, col);
 	}
 
 }
