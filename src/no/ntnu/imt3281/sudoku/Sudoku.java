@@ -99,31 +99,19 @@ public class Sudoku extends Application {
 					public void changed(ObservableValue<? extends String> observable, String oldValue,
 							String newValue) {
 
-						// Check rows, columns and boxes
-						switch (isValid(selectedRow, selectedCol, newValue)) {
-						// Input gets deleted
-						case -1:
-							Platform.runLater(() -> {
-								unlockElement(selectedRow, selectedCol);
-							});
-							break;
-						// Input field gets marked red and not deleted
-						case 0:
+						try {
+							boolean result = isValid(selectedRow, selectedCol, newValue);
+							if (result) {
+								textFields[selectedRow][selectedCol].setStyle(styleWhite);
+								checkIfCompleted();
+							} else {
+								Platform.runLater(() -> {
+									unlockElement(selectedRow, selectedCol);
+								});
+							}
+						} catch (BadNumberException e) {
 							textFields[selectedRow][selectedCol].setStyle(styleRed);
-							break;
-
-						// Input is valid and marked to default colour
-						case 1:
-							textFields[selectedRow][selectedCol].setStyle(styleWhite);
-							checkIfCompleted();
-							break;
-
-						// default should never be triggered, but delete in case
-						default:
-							Platform.runLater(() -> {
-								textFields[selectedRow][selectedCol].clear();
-							});
-							break;
+							logger.log(Level.WARNING, e.getMessage());
 						}
 					}
 				});
@@ -155,8 +143,9 @@ public class Sudoku extends Application {
 	/**
 	 * Checks if the input is valid
 	 * <p>
-	 * Checks the row, column and sub grid box if the input is valid. Returns -1 if
-	 * its illegal input, 0 if it legal but wrong and 1 if it's the right number
+	 * Checks the row, column and sub grid box if the input is valid. Throws
+	 * BadNumberException if the number is already on the board, false if it's
+	 * illegal input and true if it's legal input and the right number
 	 * </p>
 	 * 
 	 * Source for checking sub-grid: {@link https://www.baeldung.com/java-sudoku}
@@ -166,13 +155,14 @@ public class Sudoku extends Application {
 	 * @param col   from changed textField
 	 * @param value from changed textField
 	 * 
-	 * @return integer -1, 0 or 1
+	 * @return boolean true or false
+	 * @throws BadNumberException if number already exists
 	 */
-	private int isValid(int row, int col, String value) {
+	private boolean isValid(int row, int col, String value) throws BadNumberException {
 
 		// Check if empty, is not a number and number is between 1 and 9
 		if (value.isEmpty() || !value.matches("\\d") || (Integer.parseInt(value) < 1 || Integer.parseInt(value) > 9)) {
-			return -1;
+			return false;
 		}
 
 		// Check row
@@ -180,7 +170,7 @@ public class Sudoku extends Application {
 		Iterator<String> rowIterator = getIteratorRow(row);
 		while (rowIterator.hasNext()) {
 			if (rowIterator.next().equals(value) && i != col) {
-				return 0;
+				throw new BadNumberException(row, i, "Row");
 			}
 			i++;
 		}
@@ -190,7 +180,7 @@ public class Sudoku extends Application {
 		Iterator<String> colIterator = getIteratorCol(col);
 		while (colIterator.hasNext()) {
 			if (colIterator.next().equals(value) && i != row) {
-				return 0;
+				throw new BadNumberException(i, col, "Column");
 			}
 			i++;
 		}
@@ -203,13 +193,13 @@ public class Sudoku extends Application {
 		for (i = startRow; i < startRow + SUB_GRID; i++) {
 			for (j = startCol; j < startCol + SUB_GRID; j++) {
 				if (boxIterator.next().equals(value) && i != row && j != col) {
-					return 0;
+					throw new BadNumberException(i, j, "Box");
 				}
 			}
 		}
 
 		// Input is valid
-		return 1;
+		return true;
 	}
 
 	/**
