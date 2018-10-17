@@ -17,46 +17,31 @@ import java.util.logging.Logger;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.TextField;
-import javafx.scene.control.ToolBar;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.shape.Line;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 public class Sudoku extends Application {
 
 	protected static final int NUMB_ROW = 9;
 	protected static final int NUMB_COLUMN = NUMB_ROW;
-	protected static final int GAP = 10;
 	private static final int SUB_GRID = NUMB_ROW / 3;
 	private static final Logger logger = Logger.getLogger(Sudoku.class.getName());
-	private static TextField[][] textFields = new TextField[NUMB_ROW][NUMB_COLUMN];
 	private static String[][] stringArray = new String[NUMB_ROW][NUMB_COLUMN];
-	private TextField completedText;
 	private String file = "board.json";
-
-	// Source:
-	// https://www.programcreek.com/java-api-examples/?api=javafx.scene.layout.Background
-	private String styleGray = "-fx-control-inner-background: rgba(187, 187, 187, 1);";
-	private String styleWhite = "-fx-control-inner-background: rgba(255, 255, 255, 1);";
-	private String styleRed = "-fx-control-inner-background: rgba(255, 0, 0, 0.5);";
+	private SudukoViewController controller = new SudukoViewController(9);
 
 	/**
 	 * Constructor for the class Sudoku
 	 */
 	public Sudoku() {
-
+		// Initialize stringArray
+		for (int i = 0; i < NUMB_ROW; i++) {
+			for (int j = 0; j < NUMB_COLUMN; j++) {
+				stringArray[i][j] = "";
+			}
+		}
 	}
 
 	public static void main(String[] args) {
@@ -73,108 +58,22 @@ public class Sudoku extends Application {
 	}
 
 	protected void updateArray(int row, int col, String newValue) {
+		stringArray[row][col] = newValue;
 
-	}
-
-	/**
-	 * Generates the board and checks if the input is valid
-	 */
-	protected void generateAndCheck(BorderPane borderPane, ToolBar toolBar, Pane layoutPane) {
-		GridPane grid = new GridPane();
-		completedText = new TextField();
-		double gridHeight = borderPane.getHeight() - toolBar.getHeight();
-		Line[] lines = new Line[4];
-
-		for (int row = 0; row < NUMB_ROW; row++) {
-			for (int col = 0; col < NUMB_COLUMN; col++) {
-
-				textFields[row][col] = new TextField();
-				textFields[row][col].setMinHeight((gridHeight / NUMB_COLUMN) - GAP);
-
-				// Max width is borderPane width divided by number of boxes minus the gap
-				// between each box and the gap between grid and borderPane
-				textFields[row][col].setMaxWidth((borderPane.getWidth() / NUMB_ROW) - GAP - ((long) NUMB_ROW / 5.0f));
-				textFields[row][col].setAlignment(Pos.CENTER);
-				textFields[row][col].setFont(Font.font("Verdana", FontWeight.BLACK, 20));
-				grid.setPadding(new Insets(5, 5, 5, 5));
-				grid.setVgap(GAP);
-				grid.setHgap(GAP);
-				grid.add(textFields[row][col], col, row);
-
-				final int selectedRow = row;
-				final int selectedCol = col;
-
-				textFields[row][col].textProperty().addListener(new ChangeListener<String>() {
-					@Override
-					public void changed(ObservableValue<? extends String> observable, String oldValue,
-							String newValue) {
-
-						try {
-							boolean result = isValid(selectedRow, selectedCol, newValue);
-							if (result) {
-								textFields[selectedRow][selectedCol].setStyle(styleWhite);
-								completedText.setVisible(checkIfCompleted());
-							} else {
-								Platform.runLater(() -> {
-									unlockElement(selectedRow, selectedCol);
-									completedText.setVisible(checkIfCompleted());
-								});
-							}
-						} catch (BadNumberException e) {
-							textFields[selectedRow][selectedCol].setStyle(styleRed);
-							logger.log(Level.WARNING, e.getMessage());
-						}
-					}
+		try {
+			boolean result = isValid(row, col, stringArray[row][col]);
+			if (result) {
+				controller.setStyleRight(row, col);
+				controller.setVisibilityCompleted(controller.checkIfCompleted());
+			} else {
+				Platform.runLater(() -> {
+					controller.unlockElement(row, col);
 				});
+				controller.setVisibilityCompleted(controller.checkIfCompleted());
 			}
-		}
-
-		// I have to have -13 on the vertical and +4 on the horizontal for some reason
-		// this works and I don't know why
-		lines[0] = new Line((borderPane.getWidth() - 13) / 3, 0, (borderPane.getWidth() - 13) / 3, gridHeight);
-		lines[1] = new Line((borderPane.getWidth() - 13) / 1.5f, 0, (borderPane.getWidth() - 13) / 1.5f, gridHeight);
-		lines[2] = new Line(0, (gridHeight + 4) / 3, borderPane.getWidth(), (gridHeight + 4) / 3);
-		lines[3] = new Line(0, (gridHeight + 4) / 1.5f, borderPane.getWidth(), (gridHeight + 4) / 1.5f);
-
-		for (Line line : lines)
-			line.setStrokeWidth(3);
-
-		// Create completed board TextField
-		completedText.setVisible(false);
-		completedText.setEditable(false);
-		completedText.setFont(Font.font("Verdana", FontWeight.BLACK, 15));
-		completedText.setText("Congratulations! You completed the Board");
-		completedText.setPrefWidth(375);
-		completedText.setTranslateX(80);
-		completedText.setTranslateY(250);
-
-		// Add grid to borderPane and lines and completedText to layoutPane
-		borderPane.setCenter(grid);
-		layoutPane.getChildren().addAll(lines);
-		layoutPane.getChildren().add(completedText);
-	}
-
-	/**
-	 * @param row int
-	 * @param col int
-	 * 
-	 * @return element String
-	 */
-	protected String getElement(int row, int col) {
-		return textFields[row][col].getText();
-	}
-
-	/**
-	 * @param row
-	 * @param col
-	 * @param value
-	 * @throws Exception
-	 */
-	protected void setElement(int row, int col, int value) throws ElementIsLockedException {
-		if (!isLocked(row, col)) {
-			textFields[row][col].setText(value + "");
-		} else {
-			throw new ElementIsLockedException(row, col);
+		} catch (BadNumberException e) {
+			controller.setStyleWrong(row, col);
+			logger.log(Level.WARNING, e.getMessage());
 		}
 	}
 
@@ -247,7 +146,7 @@ public class Sudoku extends Application {
 	protected Iterator<String> getIteratorRow(int row) {
 		ArrayList<String> arrayListRow = new ArrayList<>();
 		for (int col = 0; col < NUMB_COLUMN; col++) {
-			arrayListRow.add(textFields[row][col].getText());
+			arrayListRow.add(stringArray[row][col]);
 		}
 		return arrayListRow.iterator();
 	}
@@ -262,7 +161,7 @@ public class Sudoku extends Application {
 	protected Iterator<String> getIteratorCol(int col) {
 		ArrayList<String> arrayListCol = new ArrayList<>();
 		for (int row = 0; row < NUMB_ROW; row++) {
-			arrayListCol.add(textFields[row][col].getText());
+			arrayListCol.add(stringArray[row][col]);
 		}
 		return arrayListCol.iterator();
 	}
@@ -288,7 +187,7 @@ public class Sudoku extends Application {
 
 		for (int r = startRow; r < endRow; r++) {
 			for (int c = startCol; c < endCol; c++) {
-				arrayListBox.add(textFields[r][c].getText());
+				arrayListBox.add(stringArray[r][c]);
 			}
 		}
 
@@ -356,7 +255,7 @@ public class Sudoku extends Application {
 					for (int col = 0; col < NUMB_COLUMN; col++) {
 						// if number is -1 it's empty
 						if (temp[row][col] != -1) {
-							lockElement(row, col, temp[row][col] + "");
+							controller.lockElement(row, col, temp[row][col] + "");
 						}
 					}
 				}
@@ -370,7 +269,7 @@ public class Sudoku extends Application {
 	protected void initializeBoard() {
 		for (int row = 0; row < NUMB_ROW; row++) {
 			for (int col = 0; col < NUMB_COLUMN; col++) {
-				unlockElement(row, col);
+				controller.unlockElement(row, col);
 			}
 		}
 	}
@@ -379,7 +278,7 @@ public class Sudoku extends Application {
 	 * Mirror the board
 	 */
 	protected void mirrorBoard() {
-		int[][] temp = convertTo2dInt(textFields);
+		int[][] temp = convertTo2dInt(stringArray);
 
 		initializeBoard();
 		Platform.runLater(() -> {
@@ -389,7 +288,7 @@ public class Sudoku extends Application {
 					// -1 because it goes to from 0 to 8
 					mirrorCol = (NUMB_COLUMN - 1) - col;
 					if (temp[row][mirrorCol] != -1) {
-						lockElement(row, col, temp[row][mirrorCol] + "");
+						controller.lockElement(row, col, temp[row][mirrorCol] + "");
 					}
 				}
 			}
@@ -401,7 +300,7 @@ public class Sudoku extends Application {
 	 * Flip the board upside down
 	 */
 	protected void flipBoard() {
-		int[][] temp = convertTo2dInt(textFields);
+		int[][] temp = convertTo2dInt(stringArray);
 
 		initializeBoard();
 		Platform.runLater(() -> {
@@ -412,7 +311,7 @@ public class Sudoku extends Application {
 					mirrorRow = (NUMB_ROW - 1) - row;
 
 					if (temp[mirrorRow][col] != -1) {
-						lockElement(row, col, temp[mirrorRow][col] + "");
+						controller.lockElement(row, col, temp[mirrorRow][col] + "");
 					}
 				}
 			}
@@ -423,14 +322,14 @@ public class Sudoku extends Application {
 	 * Flips the board from top-right to bottom-left
 	 */
 	protected void flipBlueBoard() {
-		int[][] temp = convertTo2dInt(textFields);
+		int[][] temp = convertTo2dInt(stringArray);
 
 		initializeBoard();
 		Platform.runLater(() -> {
 			for (int row = 0; row < NUMB_ROW; row++) {
 				for (int col = 0; col < NUMB_COLUMN; col++) {
 					if (temp[col][row] != -1) {
-						lockElement(row, col, temp[col][row] + "");
+						controller.lockElement(row, col, temp[col][row] + "");
 					}
 				}
 			}
@@ -442,7 +341,7 @@ public class Sudoku extends Application {
 	 * Flips the board from bottom-left to top-right
 	 */
 	protected void flipRedBoard() {
-		int[][] temp = convertTo2dInt(textFields);
+		int[][] temp = convertTo2dInt(stringArray);
 
 		initializeBoard();
 		Platform.runLater(() -> {
@@ -454,7 +353,7 @@ public class Sudoku extends Application {
 					newCol = (NUMB_COLUMN - 1) - col;
 
 					if (temp[newCol][newRow] != -1) {
-						lockElement(row, col, temp[newCol][newRow] + "");
+						controller.lockElement(row, col, temp[newCol][newRow] + "");
 					}
 				}
 			}
@@ -466,7 +365,7 @@ public class Sudoku extends Application {
 	 * Switches numbers on the board
 	 */
 	protected void switchNumbersOnBoard() {
-		int[][] temp = convertTo2dInt(textFields);
+		int[][] temp = convertTo2dInt(stringArray);
 		ArrayList<Integer> numbers = getRandomNumbers();
 
 		initializeBoard();
@@ -475,7 +374,7 @@ public class Sudoku extends Application {
 			for (int row = 0; row < NUMB_ROW; row++) {
 				for (int col = 0; col < NUMB_COLUMN; col++) {
 					if (temp[row][col] != -1) {
-						lockElement(row, col, numbers.get(temp[row][col] - 1) + "");
+						controller.lockElement(row, col, numbers.get(temp[row][col] - 1) + "");
 					}
 				}
 			}
@@ -487,64 +386,18 @@ public class Sudoku extends Application {
 	 * 
 	 * @return returnArray converted to int[][]
 	 */
-	protected int[][] convertTo2dInt(TextField[][] array) {
+	protected int[][] convertTo2dInt(String[][] array) {
 		int[][] returnArray = new int[NUMB_ROW][NUMB_COLUMN];
 		for (int row = 0; row < NUMB_ROW; row++) {
 			for (int col = 0; col < NUMB_COLUMN; col++) {
-				if (array[row][col].getStyle().equals(styleGray)) {
-					returnArray[row][col] = Integer.parseInt(textFields[row][col].getText());
+				if (controller.isLocked(row, col)) {
+					returnArray[row][col] = Integer.parseInt(array[row][col]);
 				} else {
 					returnArray[row][col] = -1;
 				}
 			}
 		}
 		return returnArray;
-	}
-
-	/**
-	 * Checks if the board is completed
-	 */
-	protected boolean checkIfCompleted() {
-		for (int row = 0; row < NUMB_ROW; row++) {
-			for (int col = 0; col < NUMB_COLUMN; col++) {
-				if (textFields[row][col].getStyle().equals(styleRed) || textFields[row][col].getText().isEmpty()) {
-					return false;
-				}
-			}
-		}
-
-		return true;
-	}
-
-	/**
-	 * @param row from textFields
-	 * @param col from textFields
-	 * 
-	 * @return true/false if element is locked
-	 */
-	protected boolean isLocked(int row, int col) {
-		return textFields[row][col].getStyle().equals(styleGray);
-	}
-
-	/**
-	 * @param row   from textFields
-	 * @param col   from textFields
-	 * @param value from textFields
-	 */
-	protected void lockElement(int row, int col, String value) {
-		textFields[row][col].setText(value);
-		textFields[row][col].setStyle(styleGray);
-		textFields[row][col].setEditable(false);
-	}
-
-	/**
-	 * @param row from textFields
-	 * @param col from textFields
-	 */
-	protected void unlockElement(int row, int col) {
-		textFields[row][col].clear();
-		textFields[row][col].setEditable(true);
-		textFields[row][col].setStyle(styleWhite);
 	}
 
 	/**

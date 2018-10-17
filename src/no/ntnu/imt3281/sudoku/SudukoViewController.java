@@ -27,7 +27,15 @@ public class SudukoViewController {
 	private static final int NUMB_COLUMN = Sudoku.NUMB_COLUMN;
 	private static final int GAP = 10;
 	private static TextField[][] textFields = new TextField[9][9];
-	private static TextField completedText;
+	private TextField completedText;
+
+	// Source:
+	// https://www.programcreek.com/java-api-examples/?api=javafx.scene.layout.Background
+	private String styleGray = "-fx-control-inner-background: rgba(187, 187, 187, 1);";
+	private String styleWhite = "-fx-control-inner-background: rgba(255, 255, 255, 1);";
+	private String styleRed = "-fx-control-inner-background: rgba(255, 0, 0, 0.5);";
+
+	private GridPane grid;
 
 	@FXML
 	private Pane layoutPane;
@@ -63,9 +71,24 @@ public class SudukoViewController {
 		sudoku = new Sudoku();
 
 		Platform.runLater(() -> {
-			sudoku.generateAndCheck(borderPane, toolBar, layoutPane);
-			// generateBoard();
+			generateBoard();
 		});
+	}
+
+	/**
+	 * This is treated as another empty constructor where the parameter i is
+	 * pointless
+	 * 
+	 * <p>
+	 * I made this constructor so that the empty constructor isn't run more than
+	 * once. This is a bodge(fixed the error badly.), but I couldn't think of
+	 * another way to to it. I tried to call the function generateBoard() once, but
+	 * I couldn't get it to work.
+	 * </p>
+	 * 
+	 * @param i int useless
+	 */
+	public SudukoViewController(int i) {
 	}
 
 	/**
@@ -75,8 +98,8 @@ public class SudukoViewController {
 	 * Generates all the 81 TextFields and the four lines on the board.
 	 * </p>
 	 */
-	private void generateBoard() {
-		GridPane grid = new GridPane();
+	public void generateBoard() {
+		grid = new GridPane();
 		completedText = new TextField();
 		double gridHeight = borderPane.getHeight() - toolBar.getHeight();
 		Line[] lines = new Line[4];
@@ -106,17 +129,6 @@ public class SudukoViewController {
 							String newValue) {
 
 						sudoku.updateArray(selectedRow, selectedCol, newValue);
-
-						/*
-						 * try { boolean result = isValid(selectedRow, selectedCol, newValue); if
-						 * (result) { textFields[selectedRow][selectedCol].setStyle(styleWhite);
-						 * completedText.setVisible(checkIfCompleted()); } else { Platform.runLater(()
-						 * -> { unlockElement(selectedRow, selectedCol);
-						 * completedText.setVisible(checkIfCompleted()); }); } } catch
-						 * (BadNumberException e) {
-						 * textFields[selectedRow][selectedCol].setStyle(styleRed);
-						 * logger.log(Level.WARNING, e.getMessage()); }
-						 */
 					}
 				});
 			}
@@ -145,6 +157,104 @@ public class SudukoViewController {
 		borderPane.setCenter(grid);
 		layoutPane.getChildren().addAll(lines);
 		layoutPane.getChildren().add(completedText);
+	}
+
+	/**
+	 * @param row   from textFields
+	 * @param col   from textFields
+	 * @param value from textFields
+	 */
+	protected void lockElement(int row, int col, String value) {
+		textFields[row][col].setText(value);
+		textFields[row][col].setStyle(styleGray);
+		textFields[row][col].setEditable(false);
+	}
+
+	/**
+	 * @param row from textFields
+	 * @param col from textFields
+	 */
+	protected void unlockElement(int row, int col) {
+		textFields[row][col].clear();
+		textFields[row][col].setEditable(true);
+		textFields[row][col].setStyle(styleWhite);
+	}
+
+	/**
+	 * @param row from textFields
+	 * @param col from textFields
+	 * 
+	 * @return true/false if element is locked
+	 */
+	protected boolean isLocked(int row, int col) {
+		return textFields[row][col].getStyle().equals(styleGray);
+	}
+
+	/**
+	 * Checks if the board is completed
+	 */
+	protected boolean checkIfCompleted() {
+		for (int row = 0; row < NUMB_ROW; row++) {
+			for (int col = 0; col < NUMB_COLUMN; col++) {
+				if (textFields[row][col].getStyle().equals(styleRed) || textFields[row][col].getText().isEmpty()) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Sets completed message TextField to visible or unvisible
+	 * 
+	 * @param isCompleted boolean
+	 */
+	protected void setVisibilityCompleted(boolean isCompleted) {
+		completedText.setVisible(isCompleted);
+	}
+
+	/**
+	 * Sets the style to the wrong color: red
+	 * 
+	 * @param row
+	 * @param col
+	 */
+	protected void setStyleWrong(int row, int col) {
+		textFields[row][col].setStyle(styleRed);
+	}
+
+	/**
+	 * Sets the style to the right color: white
+	 * 
+	 * @param row
+	 * @param col
+	 */
+	protected void setStyleRight(int row, int col) {
+		textFields[row][col].setStyle(styleWhite);
+	}
+
+	/**
+	 * @param row int
+	 * @param col int
+	 * 
+	 * @return element String
+	 */
+	protected String getElement(int row, int col) {
+		return textFields[row][col].getText();
+	}
+
+	/**
+	 * @param row
+	 * @param col
+	 * @param value
+	 * @throws Exception
+	 */
+	protected void setElement(int row, int col, int value) throws ElementIsLockedException {
+		if (!isLocked(row, col)) {
+			textFields[row][col].setText(value + "");
+		} else {
+			throw new ElementIsLockedException(row, col);
+		}
 	}
 
 	/**
