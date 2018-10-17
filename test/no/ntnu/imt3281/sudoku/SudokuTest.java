@@ -8,10 +8,13 @@ import static org.junit.Assert.assertEquals;
 
 import static org.junit.Assert.assertTrue;
 
+import java.util.logging.Logger;
+
 import org.junit.Test;
 
 public class SudokuTest {
 	private Sudoku sudoku = new Sudoku();
+	private static final Logger logger = Logger.getLogger(Sudoku.class.getName());
 
 	@Test
 	public void testEmptyConstructor() {
@@ -21,16 +24,22 @@ public class SudokuTest {
 
 	@Test
 	public void testGenerateAndCheck() {
-
+		// Probably not going to test this function :/
 	}
 
 	@Test
 	public void testGetElement() {
-		SudukoViewController controller = new SudukoViewController();
+/*
+		try {
+			sudoku.setElement(0, 0, 9);
+			String result = sudoku.getElement(0, 0);
+			assertEquals("9", result);
+			logger.log(Level.INFO, "Expected result: 9%nActual result: %d", result);
+		} catch (ElementIsLockedException e) {
+			logger.log(Level.WARNING, e.getMessage());
+		}
+		*/
 
-		String result = sudoku.getElement(0, 0);
-		assertEquals("", result);
-		System.out.println("Result is: " + result);
 	}
 
 	@Test

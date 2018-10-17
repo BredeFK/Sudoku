@@ -5,9 +5,10 @@ package no.ntnu.imt3281.sudoku;
  */
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
@@ -35,23 +36,26 @@ import javafx.stage.Stage;
 
 public class Sudoku extends Application {
 
-	private static final int NUMB_ROW = 9;
-	private static final int GAP = 10;
-	private static final int NUMB_COLUMN = NUMB_ROW;
+	protected static final int NUMB_ROW = 9;
+	protected static final int NUMB_COLUMN = NUMB_ROW;
+	protected static final int GAP = 10;
 	private static final int SUB_GRID = NUMB_ROW / 3;
 	private static final Logger logger = Logger.getLogger(Sudoku.class.getName());
-	private TextField[][] textFields;
+	private static TextField[][] textFields = new TextField[NUMB_ROW][NUMB_COLUMN];
+	private static String[][] stringArray = new String[NUMB_ROW][NUMB_COLUMN];
+	private TextField completedText;
+	private String file = "board.json";
+
 	// Source:
 	// https://www.programcreek.com/java-api-examples/?api=javafx.scene.layout.Background
 	private String styleGray = "-fx-control-inner-background: rgba(187, 187, 187, 1);";
 	private String styleWhite = "-fx-control-inner-background: rgba(255, 255, 255, 1);";
-	private String styleRed = "-fx-control-inner-background: rgba(255,0,0,0.5);";
+	private String styleRed = "-fx-control-inner-background: rgba(255, 0, 0, 0.5);";
 
 	/**
 	 * Constructor for the class Sudoku
 	 */
 	public Sudoku() {
-		textFields = new TextField[NUMB_ROW][NUMB_COLUMN];
 
 	}
 
@@ -68,18 +72,23 @@ public class Sudoku extends Application {
 		primaryStage.show();
 	}
 
+	protected void updateArray(int row, int col, String newValue) {
+
+	}
+
 	/**
 	 * Generates the board and checks if the input is valid
 	 */
 	protected void generateAndCheck(BorderPane borderPane, ToolBar toolBar, Pane layoutPane) {
 		GridPane grid = new GridPane();
+		completedText = new TextField();
 		double gridHeight = borderPane.getHeight() - toolBar.getHeight();
 		Line[] lines = new Line[4];
+
 		for (int row = 0; row < NUMB_ROW; row++) {
 			for (int col = 0; col < NUMB_COLUMN; col++) {
 
 				textFields[row][col] = new TextField();
-
 				textFields[row][col].setMinHeight((gridHeight / NUMB_COLUMN) - GAP);
 
 				// Max width is borderPane width divided by number of boxes minus the gap
@@ -104,10 +113,11 @@ public class Sudoku extends Application {
 							boolean result = isValid(selectedRow, selectedCol, newValue);
 							if (result) {
 								textFields[selectedRow][selectedCol].setStyle(styleWhite);
-								checkIfCompleted();
+								completedText.setVisible(checkIfCompleted());
 							} else {
 								Platform.runLater(() -> {
 									unlockElement(selectedRow, selectedCol);
+									completedText.setVisible(checkIfCompleted());
 								});
 							}
 						} catch (BadNumberException e) {
@@ -129,8 +139,19 @@ public class Sudoku extends Application {
 		for (Line line : lines)
 			line.setStrokeWidth(3);
 
+		// Create completed board TextField
+		completedText.setVisible(false);
+		completedText.setEditable(false);
+		completedText.setFont(Font.font("Verdana", FontWeight.BLACK, 15));
+		completedText.setText("Congratulations! You completed the Board");
+		completedText.setPrefWidth(375);
+		completedText.setTranslateX(80);
+		completedText.setTranslateY(250);
+
+		// Add grid to borderPane and lines and completedText to layoutPane
 		borderPane.setCenter(grid);
 		layoutPane.getChildren().addAll(lines);
+		layoutPane.getChildren().add(completedText);
 	}
 
 	/**
@@ -285,7 +306,7 @@ public class Sudoku extends Application {
 	protected int[][] getJson() {
 		int[][] array = new int[NUMB_ROW][NUMB_COLUMN];
 
-		try (BufferedReader buffer = new BufferedReader(new FileReader("board.json"))) {
+		try (BufferedReader buffer = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"))) {
 			StringBuilder sb = new StringBuilder();
 			String line;
 			while ((line = buffer.readLine()) != null) {
@@ -483,19 +504,16 @@ public class Sudoku extends Application {
 	/**
 	 * Checks if the board is completed
 	 */
-	protected void checkIfCompleted() {
-		boolean finished = true;
+	protected boolean checkIfCompleted() {
 		for (int row = 0; row < NUMB_ROW; row++) {
 			for (int col = 0; col < NUMB_COLUMN; col++) {
 				if (textFields[row][col].getStyle().equals(styleRed) || textFields[row][col].getText().isEmpty()) {
-					finished = false;
+					return false;
 				}
 			}
 		}
-		// TODO : write this on the fxml application and not in the logger
-		if (finished) {
-			logger.info("YAY, you completed the board!");
-		}
+
+		return true;
 	}
 
 	/**
