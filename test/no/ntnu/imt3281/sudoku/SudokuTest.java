@@ -8,7 +8,6 @@ import static org.junit.Assert.assertEquals;
 
 import static org.junit.Assert.assertTrue;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.junit.Test;
@@ -29,23 +28,25 @@ public class SudokuTest {
 	}
 
 	@Test
-	public void testGetElement() {
+	public void testGetElementInArray() {
+		String result = sudoku.getElementInArray(0, 0);
 
-		/*
-		try {
-			sudoku.setElement(0, 0, 9);
-			String result = sudoku.getElement(0, 0);
-			assertEquals("9", result);
-			logger.log(Level.INFO, "Expected result: 9%nActual result: %d", result);
-		} catch (ElementIsLockedException e) {
-			logger.log(Level.WARNING, e.getMessage());
-		}
-		*/
+		assertEquals("", result);
+	}
+
+	@Test
+	public void testSetElementInArray() {
+		String value = "9";
+
+		sudoku.setElementinArray(5, 5, value);
+		String result = sudoku.getElementInArray(5, 5);
+
+		assertEquals(value, result);
 
 	}
 
 	@Test
-	public void testSetElement() {
+	public void testUpdateArray() {
 
 	}
 
@@ -106,26 +107,6 @@ public class SudokuTest {
 
 	@Test
 	public void testConvertTo2dInt() {
-
-	}
-
-	@Test
-	public void testCheckIfCompleted() {
-
-	}
-
-	@Test
-	public void testIsLocked() {
-
-	}
-
-	@Test
-	public void testLockElement() {
-
-	}
-
-	@Test
-	public void testUnlockElement() {
 
 	}
 

@@ -11,12 +11,63 @@ import org.junit.Test;
 import javafx.application.Platform;
 
 public class SudukoViewControllerTest {
+
 	@Test
 	public void testSudukoViewController() {
 		Platform.startup(() -> {
 			SudukoViewController controller = new SudukoViewController();
 			assertTrue(controller instanceof SudukoViewController);
 		});
+	}
+
+	@Test
+	public void testGenerateBoard() {
+
+	}
+
+	@Test
+	public void testLockElement() {
+
+	}
+
+	@Test
+	public void testUnlockElement() {
+
+	}
+
+	@Test
+	public void testIsLocked() {
+
+	}
+
+	@Test
+	public void testCheckIfCompleted() {
+
+	}
+
+	@Test
+	public void testSetVisibilityCompleted() {
+
+	}
+
+	@Test
+	public void testSetStyleWrong() {
+
+	}
+
+	@Test
+	public void testSetStyleRed() {
+
+	}
+
+	@Test
+	public void testgetElement() {
+
+	}
+
+	@Test
+	public void testSetElement() {
+
 	}
 
 }

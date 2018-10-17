@@ -57,6 +57,33 @@ public class Sudoku extends Application {
 		primaryStage.show();
 	}
 
+	/**
+	 * 
+	 * @param row      int
+	 * @param col      int
+	 * @param newValue String
+	 */
+	protected void setElementinArray(int row, int col, String newValue) {
+		stringArray[row][col] = newValue;
+	}
+
+	/**
+	 * 
+	 * @param row int
+	 * @param col int
+	 * 
+	 * @return stringArray[row][col] String
+	 */
+	protected String getElementInArray(int row, int col) {
+		return stringArray[row][col];
+	}
+
+	/**
+	 * 
+	 * @param row
+	 * @param col
+	 * @param newValue
+	 */
 	protected void updateArray(int row, int col, String newValue) {
 		stringArray[row][col] = newValue;
 
