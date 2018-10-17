@@ -1,5 +1,8 @@
 package no.ntnu.imt3281.sudoku;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * @author Brede Fritjof Klausen
  */
@@ -25,6 +28,7 @@ public class SudukoViewController {
 	private Sudoku sudoku;
 	private static final int NUMB_ROW = Sudoku.NUMB_ROW;
 	private static final int NUMB_COLUMN = Sudoku.NUMB_COLUMN;
+	private static final Logger logger = Logger.getLogger(SudukoViewController.class.getName());
 	private static final int GAP = 10;
 	private static TextField[][] textFields = new TextField[9][9];
 	private TextField completedText;
@@ -210,7 +214,10 @@ public class SudukoViewController {
 	 * @param isCompleted boolean
 	 */
 	protected void setVisibilityCompleted(boolean isCompleted) {
-		completedText.setVisible(isCompleted);
+		// TODO : make this not null
+		if (isCompleted)
+			logger.log(Level.INFO, "Congratulations! You completed the Board");
+		// completedText.setVisible(isCompleted);
 	}
 
 	/**

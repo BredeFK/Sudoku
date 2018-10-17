@@ -30,6 +30,7 @@ public class Sudoku extends Application {
 	private static final Logger logger = Logger.getLogger(Sudoku.class.getName());
 	private static String[][] stringArray = new String[NUMB_ROW][NUMB_COLUMN];
 	private String file = "board.json";
+	private String encoding = "UTF-8";
 	private SudukoViewController controller = new SudukoViewController(9);
 
 	/**
@@ -128,7 +129,7 @@ public class Sudoku extends Application {
 
 		// Check row
 		int i = 0;
-		Iterator<String> rowIterator = getIteratorRow(row);
+		Iterator<String> rowIterator = getIteratorRow(row, stringArray);
 		while (rowIterator.hasNext()) {
 			if (rowIterator.next().equals(value) && i != col) {
 				throw new BadNumberException(row, i, "Row");
@@ -138,7 +139,7 @@ public class Sudoku extends Application {
 
 		// Check column
 		i = 0;
-		Iterator<String> colIterator = getIteratorCol(col);
+		Iterator<String> colIterator = getIteratorCol(col, stringArray);
 		while (colIterator.hasNext()) {
 			if (colIterator.next().equals(value) && i != row) {
 				throw new BadNumberException(i, col, "Column");
@@ -150,7 +151,7 @@ public class Sudoku extends Application {
 		int startRow = (row / SUB_GRID) * SUB_GRID;
 		int startCol = (col / SUB_GRID) * SUB_GRID;
 		int j;
-		Iterator<String> boxIterator = getIteratorBox(row, col);
+		Iterator<String> boxIterator = getIteratorBox(row, col, stringArray);
 		for (i = startRow; i < startRow + SUB_GRID; i++) {
 			for (j = startCol; j < startCol + SUB_GRID; j++) {
 				if (boxIterator.next().equals(value) && i != row && j != col) {
@@ -170,10 +171,10 @@ public class Sudoku extends Application {
 	 * 
 	 * @return Iterator<String>
 	 */
-	protected Iterator<String> getIteratorRow(int row) {
+	protected Iterator<String> getIteratorRow(int row, String[][] array) {
 		ArrayList<String> arrayListRow = new ArrayList<>();
 		for (int col = 0; col < NUMB_COLUMN; col++) {
-			arrayListRow.add(stringArray[row][col]);
+			arrayListRow.add(array[row][col]);
 		}
 		return arrayListRow.iterator();
 	}
@@ -185,10 +186,10 @@ public class Sudoku extends Application {
 	 * 
 	 * @return Iterator<String>
 	 */
-	protected Iterator<String> getIteratorCol(int col) {
+	protected Iterator<String> getIteratorCol(int col, String[][] array) {
 		ArrayList<String> arrayListCol = new ArrayList<>();
 		for (int row = 0; row < NUMB_ROW; row++) {
-			arrayListCol.add(stringArray[row][col]);
+			arrayListCol.add(array[row][col]);
 		}
 		return arrayListCol.iterator();
 	}
@@ -204,7 +205,7 @@ public class Sudoku extends Application {
 	 * @return Iterator<String>
 	 * 
 	 */
-	protected Iterator<String> getIteratorBox(int row, int col) {
+	protected Iterator<String> getIteratorBox(int row, int col, String[][] array) {
 		ArrayList<String> arrayListBox = new ArrayList<>();
 		int startRow = (row / SUB_GRID) * SUB_GRID;
 		int startCol = (col / SUB_GRID) * SUB_GRID;
@@ -214,7 +215,7 @@ public class Sudoku extends Application {
 
 		for (int r = startRow; r < endRow; r++) {
 			for (int c = startCol; c < endCol; c++) {
-				arrayListBox.add(stringArray[r][c]);
+				arrayListBox.add(array[r][c]);
 			}
 		}
 
@@ -229,10 +230,11 @@ public class Sudoku extends Application {
 	 * 
 	 * @return parsed jsonArray
 	 */
-	protected int[][] getJson() {
+	protected int[][] getJson(String fileName, String encoding) {
 		int[][] array = new int[NUMB_ROW][NUMB_COLUMN];
 
-		try (BufferedReader buffer = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"))) {
+		try (BufferedReader buffer = new BufferedReader(
+				new InputStreamReader(new FileInputStream(fileName), encoding))) {
 			StringBuilder sb = new StringBuilder();
 			String line;
 			while ((line = buffer.readLine()) != null) {
@@ -273,7 +275,7 @@ public class Sudoku extends Application {
 	 * Fill the board with numbers
 	 */
 	protected void newBoard() {
-		int[][] temp = getJson();
+		int[][] temp = getJson(file, encoding);
 
 		if (temp != null) {
 			initializeBoard();
