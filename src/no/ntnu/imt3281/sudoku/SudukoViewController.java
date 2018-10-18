@@ -317,7 +317,7 @@ public class SudukoViewController {
 	 * @throws Exception
 	 */
 	protected void setElement(int row, int col, int value) throws ElementIsLockedException {
-		if (!isLocked(row, col)) {
+		if (sudoku.isLocked(row, col)) {
 			textFields[row][col].setText(value + "");
 		} else {
 			throw new ElementIsLockedException(row, col);

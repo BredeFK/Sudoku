@@ -55,11 +55,6 @@ public class SudokuTest {
 	}
 
 	@Test
-	public void testGenerateAndCheck() {
-		// Probably not going to test this function :/
-	}
-
-	@Test
 	public void testGetElementInArray() {
 		String result = sudoku.getElementInArray(0, 0);
 
@@ -75,11 +70,6 @@ public class SudokuTest {
 
 		assertEquals(value, result);
 
-	}
-
-	@Test
-	public void testUpdateArray() {
-		// Probably not going to test this function :/
 	}
 
 	@Test
@@ -131,8 +121,6 @@ public class SudokuTest {
 		try {
 			sudoku.isValid(0, 7, "6", testArray);
 		} catch (BadNumberException e) {
-			System.out.println(e.getMessage());
-			System.out.println(rowAndColumn);
 			assertEquals(true, e.getMessage().contains(col) && e.getMessage().contains(rowAndColumn));
 		}
 
@@ -216,12 +204,31 @@ public class SudokuTest {
 
 	@Test
 	public void testNewBoard() {
+		String[][] array = new String[NUMB_ROW][NUMB_COLUMN];
+		String[][] result = sudoku.newBoard(array);
+
+		assertEquals("5", result[0][0]);
+		assertEquals("6", result[3][4]);
+		assertEquals("8", result[4][3]);
+		assertEquals("3", result[4][5]);
+		assertEquals("2", result[5][4]);
+		assertEquals("9", result[8][8]);
 
 	}
 
 	@Test
 	public void testInitializeBoard() {
+		String[][] array = new String[NUMB_ROW][NUMB_COLUMN];
+		array[0][0] = "1";
+		array[8][0] = "2";
+		array[0][8] = "3";
+		array[8][8] = "4";
 
+		String[][] result = sudoku.initializeBoard(array);
+		assertEquals("", result[0][0]);
+		assertEquals("", result[8][0]);
+		assertEquals("", result[0][8]);
+		assertEquals("", result[8][8]);
 	}
 
 	@Test
@@ -236,7 +243,6 @@ public class SudokuTest {
 
 	@Test
 	public void testFlipBlueBoard() {
-
 	}
 
 	@Test
