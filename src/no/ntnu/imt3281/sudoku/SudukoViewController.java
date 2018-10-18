@@ -1,5 +1,6 @@
 package no.ntnu.imt3281.sudoku;
 
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,6 +33,8 @@ public class SudukoViewController {
 	private static final int GAP = 10;
 	private static TextField[][] textFields = new TextField[9][9];
 	private TextField completedText;
+	private static String defaultLan = Main.defaultLan;
+	private ResourceBundle bundle = ResourceBundle.getBundle(defaultLan);
 
 	// Source:
 	// https://www.programcreek.com/java-api-examples/?api=javafx.scene.layout.Background
@@ -133,7 +136,7 @@ public class SudukoViewController {
 							String newValue) {
 
 						// sudoku.updateArray(selectedRow, selectedCol, newValue);
-						checkIfValidInput(selectedRow, selectedCol);
+						checkIfValidInput(selectedRow, selectedCol, newValue);
 					}
 				});
 			}
@@ -153,7 +156,7 @@ public class SudukoViewController {
 		completedText.setVisible(false);
 		completedText.setEditable(false);
 		completedText.setFont(Font.font("Verdana", FontWeight.BLACK, 15));
-		completedText.setText("Congratulations! You completed the Board");
+		completedText.setText(bundle.getString("congrats"));
 		completedText.setPrefWidth(375);
 		completedText.setTranslateX(80);
 		completedText.setTranslateY(250);
@@ -203,13 +206,13 @@ public class SudukoViewController {
 	 * @param col
 	 * @param newValue
 	 */
-	protected void checkIfValidInput(int row, int col) {
+	protected void checkIfValidInput(int row, int col, String newValue) {
 		String[][] array = convertTo2dString();
 
 		try {
-			boolean result = sudoku.isValid(row, col, textFields[row][col].getText(), array);
+			boolean result = sudoku.isValid(row, col, newValue, array);
 			if (result) {
-				sudoku.updateArray(row, col, textFields[row][col].getText());
+				sudoku.updateArray(row, col, newValue);
 				setStyleRight(row, col);
 				completedText.setVisible(checkIfCompleted());
 			} else {
@@ -217,7 +220,7 @@ public class SudukoViewController {
 				completedText.setVisible(checkIfCompleted());
 			}
 		} catch (BadNumberException e) {
-			sudoku.updateArray(row, col, textFields[row][col].getText());
+			sudoku.updateArray(row, col, newValue);
 			setStyleWrong(row, col);
 			logger.log(Level.WARNING, e.getMessage());
 		}

@@ -1,5 +1,7 @@
 package no.ntnu.imt3281.sudoku;
 
+import java.util.ResourceBundle;
+
 /**
  * @author Brede Fritjof Klausen
  */
@@ -9,6 +11,8 @@ public class BadNumberException extends Exception {
 	private final int row;
 	private final int col;
 	private final String place;
+	private static String defaultLan = Main.defaultLan;// "no.ntnu.imt3281.sudoku.MessagesBundle";
+	private ResourceBundle bundle = ResourceBundle.getBundle(defaultLan);
 
 	/**
 	 * 
@@ -25,7 +29,8 @@ public class BadNumberException extends Exception {
 
 	@Override
 	public String getMessage() {
-		return String.format("%s Exception: Number already exists in Row: %d and Col: %d", place, row, col);
+		return String.format("%s %s %d %s %d", place, bundle.getString("badNumberException1"), row,
+				bundle.getString("badNumberException2"), col);
 	}
 
 }

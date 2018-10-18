@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,8 +24,10 @@ public class Sudoku {
 	private static final Logger logger = Logger.getLogger(Sudoku.class.getName());
 	private static String[][] stringArray = new String[NUMB_ROW][NUMB_COLUMN];
 	private String file = "board.json";
+	private static String defaultLan = Main.defaultLan; // "no.ntnu.imt3281.sudoku.MessagesBundle";
 	private String encoding = "UTF-8";
 	private SudukoViewController controller = new SudukoViewController(9);
+	private ResourceBundle bundle = ResourceBundle.getBundle(defaultLan);
 
 	/**
 	 * Constructor for the class Sudoku
@@ -96,7 +99,7 @@ public class Sudoku {
 		Iterator<String> rowIterator = getIteratorRow(row, array);
 		while (rowIterator.hasNext()) {
 			if (rowIterator.next().equals(value) && i != col) {
-				throw new BadNumberException(row, i, "Row");
+				throw new BadNumberException(row, i, bundle.getString("row"));
 			}
 			i++;
 		}
@@ -106,7 +109,7 @@ public class Sudoku {
 		Iterator<String> colIterator = getIteratorCol(col, array);
 		while (colIterator.hasNext()) {
 			if (colIterator.next().equals(value) && i != row) {
-				throw new BadNumberException(i, col, "Column");
+				throw new BadNumberException(i, col, bundle.getString("col"));
 			}
 			i++;
 		}
@@ -119,7 +122,7 @@ public class Sudoku {
 		for (i = startRow; i < startRow + SUB_GRID; i++) {
 			for (j = startCol; j < startCol + SUB_GRID; j++) {
 				if (boxIterator.next().equals(value) && i != row && j != col) {
-					throw new BadNumberException(i, j, "Box");
+					throw new BadNumberException(i, j, bundle.getString("box"));
 				}
 			}
 		}
@@ -226,10 +229,10 @@ public class Sudoku {
 
 		} catch (FileNotFoundException e) {
 			array = null;
-			logger.log(Level.WARNING, String.format("File not found: %s%n", e.getMessage()));
+			logger.log(Level.WARNING, String.format("%s %s%n", bundle.getString("notFound"), e.getMessage()));
 		} catch (IOException e) {
 			array = null;
-			logger.log(Level.WARNING, String.format("IOException: %s%n", e.getMessage()));
+			logger.log(Level.WARNING, String.format("%s %s%n", bundle.getString("ioException"), e.getMessage()));
 		}
 
 		return array;
@@ -261,7 +264,6 @@ public class Sudoku {
 					// if number is -1 it's empty
 					if (temp[row][col] != -1) {
 						array[row][col] = (temp[row][col] + "");
-						// updateArray(row, col, array[row][col]);
 					}
 				}
 			}
@@ -284,8 +286,6 @@ public class Sudoku {
 				mirrorCol = (NUMB_COLUMN - 1) - col;
 				if (temp[row][mirrorCol] != -1) {
 					array[row][col] = (temp[row][mirrorCol] + "");
-					// updateArray(row, col, array[row][col]);
-					// controller.lockElement(row, col, temp[row][mirrorCol] + "");
 				}
 			}
 		}
@@ -307,7 +307,6 @@ public class Sudoku {
 
 				if (temp[mirrorRow][col] != -1) {
 					array[row][col] = (temp[mirrorRow][col] + "");
-					// controller.lockElement(row, col, temp[mirrorRow][col] + "");
 				}
 			}
 		}
@@ -325,7 +324,6 @@ public class Sudoku {
 			for (int col = 0; col < NUMB_COLUMN; col++) {
 				if (temp[col][row] != -1) {
 					array[row][col] = (temp[col][row] + "");
-					// controller.lockElement(row, col, temp[col][row] + "");
 				}
 			}
 		}
@@ -348,7 +346,6 @@ public class Sudoku {
 
 				if (temp[newCol][newRow] != -1) {
 					array[row][col] = (temp[newCol][newRow] + "");
-					// controller.lockElement(row, col, temp[newCol][newRow] + "");
 				}
 			}
 		}
@@ -368,7 +365,6 @@ public class Sudoku {
 			for (int col = 0; col < NUMB_COLUMN; col++) {
 				if (temp[row][col] != -1) {
 					array[row][col] = (numbers.get(temp[row][col] - 1) + "");
-					// controller.lockElement(row, col, numbers.get(temp[row][col] - 1) + "");
 				}
 			}
 		}

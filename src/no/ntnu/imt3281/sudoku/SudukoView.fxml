@@ -15,13 +15,13 @@
          <bottom>
             <ToolBar fx:id="toolBar" prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                <items>
-                  <Button fx:id="btnNew" mnemonicParsing="false" onAction="#onNewClick" text="New Game" />
-                  <Button fx:id="btnMirror" mnemonicParsing="false" onAction="#onMirrorClick" text="Mirror" />
-                  <Button fx:id="btnFlip" mnemonicParsing="false" onAction="#onFlipClick" text="Flip" />
-                  <Button fx:id="btnBlue" mnemonicParsing="false" onAction="#onBlueFlipClick" text="Blue" />
-                  <Button fx:id="btnRed" mnemonicParsing="false" onAction="#onRedFlipClick" text="Red" />
-                  <Button fx:id="btnSwitch" mnemonicParsing="false" onAction="#onSwitchClick" text="Switch Numbers" />
-                  <Button fx:id="btnClear" mnemonicParsing="false" onAction="#onClearClick" text="Clear" />
+                  <Button fx:id="btnNew" mnemonicParsing="false" onAction="#onNewClick" text="%newGame" />
+                  <Button fx:id="btnMirror" mnemonicParsing="false" onAction="#onMirrorClick" text="%mirror" />
+                  <Button fx:id="btnFlip" mnemonicParsing="false" onAction="#onFlipClick" text="%flip" />
+                  <Button fx:id="btnBlue" mnemonicParsing="false" onAction="#onBlueFlipClick" text="%blue" />
+                  <Button fx:id="btnRed" mnemonicParsing="false" onAction="#onRedFlipClick" text="%red" />
+                  <Button fx:id="btnSwitch" mnemonicParsing="false" onAction="#onSwitchClick" text="%switch" />
+                  <Button fx:id="btnClear" mnemonicParsing="false" onAction="#onClearClick" text="%clear" />
                </items>
             </ToolBar>
          </bottom>
