@@ -328,7 +328,9 @@ public class SudukoViewController {
 	 */
 	@FXML
 	private void onNewClick(ActionEvent event) {
-		sudoku.newBoard();
+		String[][] array = convertTo2dString();
+		array = sudoku.newBoard(array);
+		fillBoardList(array);
 	}
 
 	/**
@@ -338,7 +340,9 @@ public class SudukoViewController {
 	 */
 	@FXML
 	private void onMirrorClick(ActionEvent event) {
-		sudoku.mirrorBoard();
+		String[][] array = convertTo2dString();
+		array = sudoku.mirrorBoard(array);
+		fillBoardList(array);
 	}
 
 	/**
@@ -348,7 +352,9 @@ public class SudukoViewController {
 	 */
 	@FXML
 	private void onFlipClick(ActionEvent event) {
-		sudoku.flipBoard();
+		String[][] array = convertTo2dString();
+		array = sudoku.flipBoard(array);
+		fillBoardList(array);
 	}
 
 	/**
@@ -358,7 +364,9 @@ public class SudukoViewController {
 	 */
 	@FXML
 	private void onBlueFlipClick(ActionEvent event) {
-		sudoku.flipBlueBoard();
+		String[][] array = convertTo2dString();
+		array = sudoku.flipBlueBoard(array);
+		fillBoardList(array);
 	}
 
 	/**
@@ -368,7 +376,9 @@ public class SudukoViewController {
 	 */
 	@FXML
 	private void onRedFlipClick(ActionEvent event) {
-		sudoku.flipRedBoard();
+		String[][] array = convertTo2dString();
+		array = sudoku.flipRedBoard(array);
+		fillBoardList(array);
 	}
 
 	/**
@@ -378,7 +388,9 @@ public class SudukoViewController {
 	 */
 	@FXML
 	private void onSwitchClick(ActionEvent event) {
-		sudoku.switchNumbersOnBoard();
+		String[][] array = convertTo2dString();
+		array = sudoku.switchNumbersOnBoard(array);
+		fillBoardList(array);
 	}
 
 	/**
@@ -388,6 +400,28 @@ public class SudukoViewController {
 	 */
 	@FXML
 	private void onClearClick(ActionEvent event) {
-		sudoku.initializeBoard();
+		String[][] array = convertTo2dString();
+		array = sudoku.initializeBoard(array);
+		fillBoardList(array);
+	}
+
+	private void fillBoardList(String[][] array) {
+
+		// Initialize GUI board first
+		for (int row = 0; row < NUMB_ROW; row++) {
+			for (int col = 0; col < NUMB_COLUMN; col++) {
+				textFields[row][col].clear();
+			}
+		}
+
+		// And then fill GUI board with new inputs
+		for (int row = 0; row < NUMB_ROW; row++) {
+			for (int col = 0; col < NUMB_COLUMN; col++) {
+				textFields[row][col].setText(array[row][col]);
+				if (!textFields[row][col].getText().isEmpty()) {
+					lockElement(row, col, textFields[row][col].getText());
+				}
+			}
+		}
 	}
 }

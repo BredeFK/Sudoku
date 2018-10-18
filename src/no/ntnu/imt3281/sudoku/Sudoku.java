@@ -22,7 +22,7 @@ public class Sudoku {
 	protected static final int SUB_GRID = NUMB_ROW / 3;
 	private static final Logger logger = Logger.getLogger(Sudoku.class.getName());
 	private static String[][] stringArray = new String[NUMB_ROW][NUMB_COLUMN];
-	private String file = "board-almost-solved.json";
+	private String file = "board.json";
 	private String encoding = "UTF-8";
 	private SudukoViewController controller = new SudukoViewController(9);
 
@@ -236,64 +236,69 @@ public class Sudoku {
 	}
 
 	/**
+	 * Unlocks all the elements on the board
+	 */
+	protected String[][] initializeBoard(String[][] array) {
+		for (int row = 0; row < NUMB_ROW; row++) {
+			for (int col = 0; col < NUMB_COLUMN; col++) {
+				array[row][col] = "";
+			}
+		}
+		return array;
+	}
+
+	/**
 	 * Fill the board with numbers
 	 */
-	protected void newBoard() {
+	protected String[][] newBoard(String[][] array) {
 		int[][] temp = getJson(file, encoding);
 
 		if (temp != null) {
-			initializeBoard();
+			array = initializeBoard(array);
 
 			for (int row = 0; row < NUMB_ROW; row++) {
 				for (int col = 0; col < NUMB_COLUMN; col++) {
 					// if number is -1 it's empty
 					if (temp[row][col] != -1) {
-						controller.lockElement(row, col, temp[row][col] + "");
+						array[row][col] = (temp[row][col] + "");
+						// updateArray(row, col, array[row][col]);
 					}
 				}
 			}
-
 		}
-	}
 
-	/**
-	 * Unlocks all the elements on the board
-	 */
-	protected void initializeBoard() {
-		for (int row = 0; row < NUMB_ROW; row++) {
-			for (int col = 0; col < NUMB_COLUMN; col++) {
-				controller.unlockElement(row, col);
-			}
-		}
+		return array;
 	}
 
 	/**
 	 * Mirror the board
 	 */
-	protected void mirrorBoard() {
-		int[][] temp = convertTo2dInt(stringArray);
+	protected String[][] mirrorBoard(String[][] array) {
+		int[][] temp = convertTo2dInt(array);
 
-		initializeBoard();
+		array = initializeBoard(array);
 		int mirrorCol = 0;
 		for (int row = 0; row < NUMB_ROW; row++) {
 			for (int col = 0; col < NUMB_COLUMN; col++) {
 				// -1 because it goes to from 0 to 8
 				mirrorCol = (NUMB_COLUMN - 1) - col;
 				if (temp[row][mirrorCol] != -1) {
-					controller.lockElement(row, col, temp[row][mirrorCol] + "");
+					array[row][col] = (temp[row][mirrorCol] + "");
+					// updateArray(row, col, array[row][col]);
+					// controller.lockElement(row, col, temp[row][mirrorCol] + "");
 				}
 			}
 		}
-
+		return array;
 	}
 
 	/**
 	 * Flip the board upside down
 	 */
-	protected void flipBoard() {
-		int[][] temp = convertTo2dInt(stringArray);
+	protected String[][] flipBoard(String[][] array) {
+		int[][] temp = convertTo2dInt(array);
 
-		initializeBoard();
+		array = initializeBoard(array);
 		int mirrorRow = 0;
 		for (int row = 0; row < NUMB_ROW; row++) {
 			for (int col = 0; col < NUMB_COLUMN; col++) {
@@ -301,35 +306,39 @@ public class Sudoku {
 				mirrorRow = (NUMB_ROW - 1) - row;
 
 				if (temp[mirrorRow][col] != -1) {
-					controller.lockElement(row, col, temp[mirrorRow][col] + "");
+					array[row][col] = (temp[mirrorRow][col] + "");
+					// controller.lockElement(row, col, temp[mirrorRow][col] + "");
 				}
 			}
 		}
+		return array;
 	}
 
 	/**
 	 * Flips the board from top-right to bottom-left
 	 */
-	protected void flipBlueBoard() {
-		int[][] temp = convertTo2dInt(stringArray);
+	protected String[][] flipBlueBoard(String[][] array) {
+		int[][] temp = convertTo2dInt(array);
 
-		initializeBoard();
+		array = initializeBoard(array);
 		for (int row = 0; row < NUMB_ROW; row++) {
 			for (int col = 0; col < NUMB_COLUMN; col++) {
 				if (temp[col][row] != -1) {
-					controller.lockElement(row, col, temp[col][row] + "");
+					array[row][col] = (temp[col][row] + "");
+					// controller.lockElement(row, col, temp[col][row] + "");
 				}
 			}
 		}
+		return array;
 	}
 
 	/**
 	 * Flips the board from bottom-left to top-right
 	 */
-	protected void flipRedBoard() {
-		int[][] temp = convertTo2dInt(stringArray);
+	protected String[][] flipRedBoard(String[][] array) {
+		int[][] temp = convertTo2dInt(array);
 
-		initializeBoard();
+		array = initializeBoard(array);
 		int newRow = 0;
 		int newCol = 0;
 		for (int row = 0; row < NUMB_ROW; row++) {
@@ -338,28 +347,32 @@ public class Sudoku {
 				newCol = (NUMB_COLUMN - 1) - col;
 
 				if (temp[newCol][newRow] != -1) {
-					controller.lockElement(row, col, temp[newCol][newRow] + "");
+					array[row][col] = (temp[newCol][newRow] + "");
+					// controller.lockElement(row, col, temp[newCol][newRow] + "");
 				}
 			}
 		}
+		return array;
 	}
 
 	/**
 	 * Switches numbers on the board
 	 */
-	protected void switchNumbersOnBoard() {
-		int[][] temp = convertTo2dInt(stringArray);
+	protected String[][] switchNumbersOnBoard(String[][] array) {
+		int[][] temp = convertTo2dInt(array);
 		ArrayList<Integer> numbers = getRandomNumbers();
 
-		initializeBoard();
+		array = initializeBoard(array);
 
 		for (int row = 0; row < NUMB_ROW; row++) {
 			for (int col = 0; col < NUMB_COLUMN; col++) {
 				if (temp[row][col] != -1) {
-					controller.lockElement(row, col, numbers.get(temp[row][col] - 1) + "");
+					array[row][col] = (numbers.get(temp[row][col] - 1) + "");
+					// controller.lockElement(row, col, numbers.get(temp[row][col] - 1) + "");
 				}
 			}
 		}
+		return array;
 	}
 
 	/**
