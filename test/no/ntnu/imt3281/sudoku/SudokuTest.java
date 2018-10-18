@@ -1,6 +1,7 @@
 package no.ntnu.imt3281.sudoku;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 
 /**
@@ -233,20 +234,67 @@ public class SudokuTest {
 
 	@Test
 	public void testMirrorBoard() {
+		String[][] array = new String[NUMB_ROW][NUMB_COLUMN];
+		String[][] result = sudoku.mirrorBoard(sudoku.newBoard(array));
 
+		assertEquals("5", result[0][8]);
+		assertEquals("6", result[3][4]);
+		assertEquals("8", result[4][5]);
+		assertEquals("3", result[4][3]);
+		assertEquals("2", result[5][4]);
+		assertEquals("9", result[8][0]);
 	}
 
 	@Test
 	public void testFlipBoard() {
+		String[][] array = new String[NUMB_ROW][NUMB_COLUMN];
+		String[][] result = sudoku.flipBoard(sudoku.newBoard(array));
 
+		assertEquals("5", result[8][0]);
+		assertEquals("6", result[5][4]);
+		assertEquals("8", result[4][3]);
+		assertEquals("3", result[4][5]);
+		assertEquals("2", result[3][4]);
+		assertEquals("9", result[0][8]);
 	}
 
 	@Test
 	public void testFlipBlueBoard() {
+		String[][] array = new String[NUMB_ROW][NUMB_COLUMN];
+		String[][] result = sudoku.flipBlueBoard(sudoku.newBoard(array));
+
+		assertEquals("5", result[0][0]);
+		assertEquals("6", result[4][3]);
+		assertEquals("8", result[3][4]);
+		assertEquals("3", result[5][4]);
+		assertEquals("2", result[4][5]);
+		assertEquals("9", result[8][8]);
+	}
+
+	@Test
+	public void testFlipRedBoard() {
+		String[][] array = new String[NUMB_ROW][NUMB_COLUMN];
+		String[][] result = sudoku.flipRedBoard(sudoku.newBoard(array));
+
+		assertEquals("5", result[8][8]);
+		assertEquals("6", result[4][5]);
+		assertEquals("8", result[5][4]);
+		assertEquals("3", result[3][4]);
+		assertEquals("2", result[4][3]);
+		assertEquals("9", result[0][0]);
 	}
 
 	@Test
 	public void testSwitchNumbersOnBoard() {
+		String[][] array = new String[NUMB_ROW][NUMB_COLUMN];
+		String[][] result = sudoku.switchNumbersOnBoard(sudoku.newBoard(array));
+
+		assertNotEquals("5", result[0][0]);
+		assertNotEquals("6", result[3][4]);
+		assertNotEquals("8", result[4][3]);
+		assertNotEquals("3", result[4][5]);
+		assertNotEquals("2", result[5][4]);
+		assertNotEquals("9", result[8][8]);
 
 	}
 
