@@ -26,7 +26,7 @@ public class Sudoku extends Application {
 
 	protected static final int NUMB_ROW = 9;
 	protected static final int NUMB_COLUMN = NUMB_ROW;
-	private static final int SUB_GRID = NUMB_ROW / 3;
+	protected static final int SUB_GRID = NUMB_ROW / 3;
 	private static final Logger logger = Logger.getLogger(Sudoku.class.getName());
 	private static String[][] stringArray = new String[NUMB_ROW][NUMB_COLUMN];
 	private String file = "board.json";
@@ -89,7 +89,7 @@ public class Sudoku extends Application {
 		stringArray[row][col] = newValue;
 
 		try {
-			boolean result = isValid(row, col, stringArray[row][col]);
+			boolean result = isValid(row, col, stringArray[row][col], stringArray);
 			if (result) {
 				controller.setStyleRight(row, col);
 				controller.setVisibilityCompleted(controller.checkIfCompleted());
@@ -120,7 +120,7 @@ public class Sudoku extends Application {
 	 * @return boolean true or false
 	 * @throws BadNumberException if number already exists
 	 */
-	protected boolean isValid(int row, int col, String value) throws BadNumberException {
+	protected boolean isValid(int row, int col, String value, String[][] array) throws BadNumberException {
 
 		// Check if empty, is not a number and number is between 1 and 9
 		if (value.isEmpty() || !value.matches("\\d") || (Integer.parseInt(value) < 1 || Integer.parseInt(value) > 9)) {
@@ -129,7 +129,7 @@ public class Sudoku extends Application {
 
 		// Check row
 		int i = 0;
-		Iterator<String> rowIterator = getIteratorRow(row, stringArray);
+		Iterator<String> rowIterator = getIteratorRow(row, array);
 		while (rowIterator.hasNext()) {
 			if (rowIterator.next().equals(value) && i != col) {
 				throw new BadNumberException(row, i, "Row");
@@ -139,7 +139,7 @@ public class Sudoku extends Application {
 
 		// Check column
 		i = 0;
-		Iterator<String> colIterator = getIteratorCol(col, stringArray);
+		Iterator<String> colIterator = getIteratorCol(col, array);
 		while (colIterator.hasNext()) {
 			if (colIterator.next().equals(value) && i != row) {
 				throw new BadNumberException(i, col, "Column");
@@ -151,7 +151,7 @@ public class Sudoku extends Application {
 		int startRow = (row / SUB_GRID) * SUB_GRID;
 		int startCol = (col / SUB_GRID) * SUB_GRID;
 		int j;
-		Iterator<String> boxIterator = getIteratorBox(row, col, stringArray);
+		Iterator<String> boxIterator = getIteratorBox(row, col, array);
 		for (i = startRow; i < startRow + SUB_GRID; i++) {
 			for (j = startCol; j < startCol + SUB_GRID; j++) {
 				if (boxIterator.next().equals(value) && i != row && j != col) {

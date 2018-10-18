@@ -10,7 +10,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Iterator;
-import java.util.logging.Logger;
 
 import org.junit.Test;
 
@@ -18,7 +17,7 @@ public class SudokuTest {
 	private Sudoku sudoku = new Sudoku();
 	private static int NUMB_ROW = Sudoku.NUMB_ROW;
 	private static int NUMB_COLUMN = Sudoku.NUMB_COLUMN;
-	private static final Logger logger = Logger.getLogger(Sudoku.class.getName());
+	private static int SUB_GRID = Sudoku.SUB_GRID;
 	private String emptyElement = " ";
 
 	/**
@@ -73,12 +72,71 @@ public class SudokuTest {
 
 	@Test
 	public void testUpdateArray() {
-
+		// Probably not going to test this function :/
 	}
 
 	@Test
 	public void testIsValid() {
+		String[][] testArray = getJsonBoardStringArray();
+		try {
+			// Test empty input
+			boolean result = sudoku.isValid(0, 0, "", testArray);
+			assertEquals(false, result);
 
+			// Test not number input
+			result = sudoku.isValid(0, 0, "b", testArray);
+			assertEquals(false, result);
+
+			// Test below 1 input
+			result = sudoku.isValid(0, 0, "0", testArray);
+			assertEquals(false, result);
+
+			// Test above 9 input
+			result = sudoku.isValid(0, 0, "10", testArray);
+			assertEquals(false, result);
+
+			// Test valid input
+			result = sudoku.isValid(0, 2, "1", testArray);
+			assertEquals(true, result);
+		} catch (BadNumberException e) {
+
+		}
+
+	}
+
+	@Test
+	public void testValidRow() {
+
+		String[][] testArray = getJsonBoardStringArray();
+
+		try {
+			sudoku.isValid(0, 6, "3", testArray);
+		} catch (BadNumberException e) {
+			assertEquals(true, e.getMessage().contains("Row") && e.getMessage().contains("Row: 0 and Col: 1"));
+		}
+	}
+
+	@Test
+	public void testValidCol() {
+		String[][] testArray = getJsonBoardStringArray();
+
+		try {
+			sudoku.isValid(0, 7, "6", testArray);
+		} catch (BadNumberException e) {
+			assertEquals(true, e.getMessage().contains("Column") && e.getMessage().contains("Row: 2 and Col: 7"));
+		}
+
+	}
+
+	@Test
+	public void testValidBox() {
+		String[][] testArray = getJsonBoardStringArray();
+
+		try {
+			sudoku.isValid(5, 3, "3", testArray);
+		} catch (BadNumberException e) {
+			assertEquals(true, e.getMessage().contains("Box") && e.getMessage().contains("Row: 4 and Col: 5"));
+		}
 	}
 
 	@Test
@@ -111,11 +169,11 @@ public class SudokuTest {
 		String[][] testArray = getJsonBoardStringArray();
 		Iterator<String> testIterator = sudoku.getIteratorBox(4, 4, testArray);
 
-		int startRow = (4 / 3) * 3;
-		int startCol = (4 / 3) * 3;
+		int startRow = (4 / SUB_GRID) * SUB_GRID;
+		int startCol = (4 / SUB_GRID) * SUB_GRID;
 
-		for (int row = startRow; row < (startRow + 3); row++) {
-			for (int col = startCol; col < (startCol + 3); col++) {
+		for (int row = startRow; row < (startRow + SUB_GRID); row++) {
+			for (int col = startCol; col < (startCol + SUB_GRID); col++) {
 				assertEquals(testArray[row][col], testIterator.next());
 			}
 		}
