@@ -3,19 +3,24 @@ package no.ntnu.imt3281.sudoku;
 import java.util.ResourceBundle;
 
 /**
- * @author Brede Fritjof Klausen
+ * Exception that is called for when an element is locked
+ * 
+ * @author Fritjof
+ *
  */
 public class ElementIsLockedException extends Exception {
 
 	private static final long serialVersionUID = -1122364685372394575L;
 	private final int row;
 	private final int col;
-	private static String defaultLan = Main.defaultLan;// = "no.ntnu.imt3281.sudoku.MessagesBundle";
+	private static String defaultLan = Main.defaultLan;
 	private ResourceBundle bundle = ResourceBundle.getBundle(defaultLan);
 
 	/**
-	 * @param row
-	 * @param col
+	 * Constructor for the class
+	 * 
+	 * @param row int for the element
+	 * @param col int for the element
 	 */
 	public ElementIsLockedException(int row, int col) {
 		this.row = row;

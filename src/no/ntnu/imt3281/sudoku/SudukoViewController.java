@@ -24,6 +24,12 @@ import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
+/**
+ * Controller for the GUI
+ * 
+ * @author Fritjof
+ * 
+ */
 public class SudukoViewController {
 
 	private Sudoku sudoku;
@@ -68,7 +74,7 @@ public class SudukoViewController {
 	private GridPane gridID;
 
 	/**
-	 * Generates the board <br>
+	 * Generates the board and creates an instance of Sudoku <br>
 	 * <br>
 	 * 
 	 * Source for Platform.runLater:
@@ -83,27 +89,8 @@ public class SudukoViewController {
 	}
 
 	/**
-	 * This is treated as another empty constructor where the parameter i is
-	 * pointless
 	 * 
-	 * <p>
-	 * I made this constructor so that the empty constructor isn't run more than
-	 * once. This is a bodge(fixed the error badly.), but I couldn't think of
-	 * another way to to it. I tried to call the function generateBoard() once, but
-	 * I couldn't get it to work.
-	 * </p>
-	 * 
-	 * @param i int useless
-	 */
-	public SudukoViewController(int i) {
-	}
-
-	/**
-	 * Generates the board
-	 * 
-	 * <p>
 	 * Generates all the 81 TextFields and the four lines on the board.
-	 * </p>
 	 */
 	public void generateBoard() {
 		grid = new GridPane();
@@ -135,7 +122,6 @@ public class SudukoViewController {
 					public void changed(ObservableValue<? extends String> observable, String oldValue,
 							String newValue) {
 
-						// sudoku.updateArray(selectedRow, selectedCol, newValue);
 						checkIfValidInput(selectedRow, selectedCol, newValue);
 					}
 				});
@@ -168,8 +154,9 @@ public class SudukoViewController {
 	}
 
 	/**
+	 * Converts TextField array to String array
 	 * 
-	 * @return temp String[][]
+	 * @return temp String[][] converted array
 	 */
 	protected String[][] convertTo2dString() {
 		String[][] temp = new String[NUMB_ROW][NUMB_COLUMN];
@@ -182,9 +169,11 @@ public class SudukoViewController {
 	}
 
 	/**
-	 * @param stringArray String[][]
+	 * Converts String array to TextField array
 	 * 
-	 * @return textFieldArray TextField[][]
+	 * @param stringArray String[][] array to convert
+	 * 
+	 * @return textFieldArray TextField[][] converted array
 	 */
 	protected TextField[][] convertTo2dTextField(String[][] stringArray) {
 		TextField[][] textFieldArray = new TextField[NUMB_ROW][NUMB_COLUMN];
@@ -202,9 +191,9 @@ public class SudukoViewController {
 	/**
 	 * This function only updates the array when it's a valid input.
 	 * 
-	 * @param row
-	 * @param col
-	 * @param newValue
+	 * @param row      int the row the element is on
+	 * @param col      int the column the elemnt is on
+	 * @param newValue String the new value on the element
 	 */
 	protected void checkIfValidInput(int row, int col, String newValue) {
 		String[][] array = convertTo2dString();
@@ -212,21 +201,27 @@ public class SudukoViewController {
 		try {
 			boolean result = sudoku.isValid(row, col, newValue, array);
 			if (result) {
+				// The result is valid input and the field should turn white
 				sudoku.updateArray(row, col, newValue);
-				setStyleRight(row, col);
+				textFields[row][col].setStyle(styleWhite);
 				completedText.setVisible(checkIfCompleted());
 			} else {
+				// The result is not valid input and should be deleted (Can trigger
+				// IllegalArgumentException)
 				unlockElement(row, col);
 				completedText.setVisible(checkIfCompleted());
 			}
 		} catch (BadNumberException e) {
+			// The result is valid, but already exists in a row/col/box and should turn red
 			sudoku.updateArray(row, col, newValue);
-			setStyleWrong(row, col);
+			textFields[row][col].setStyle(styleRed);
 			logger.log(Level.WARNING, e.getMessage());
 		}
 	}
 
 	/**
+	 * Locks the element on the board
+	 * 
 	 * @param row   from textFields
 	 * @param col   from textFields
 	 * @param value from textFields
@@ -238,6 +233,8 @@ public class SudukoViewController {
 	}
 
 	/**
+	 * Unlocks the element on the board
+	 * 
 	 * @param row from textFields
 	 * @param col from textFields
 	 */
@@ -248,80 +245,20 @@ public class SudukoViewController {
 	}
 
 	/**
-	 * @param row from textFields
-	 * @param col from textFields
-	 * 
-	 * @return true/false if element is locked
-	 */
-	protected boolean isLocked(int row, int col) {
-		return textFields[row][col].getStyle().equals(styleGray);
-	}
-
-	/**
 	 * Checks if the board is completed
+	 * 
+	 * @return true/false empty or not
 	 */
 	protected boolean checkIfCompleted() {
 		for (int row = 0; row < NUMB_ROW; row++) {
 			for (int col = 0; col < NUMB_COLUMN; col++) {
 				if (textFields[row][col].getStyle().equals(styleRed) || textFields[row][col].getText().isEmpty()) {
+					// if an element is red or empty
 					return false;
 				}
 			}
 		}
 		return true;
-	}
-
-	/**
-	 * Sets completed message TextField to visible or unvisible
-	 * 
-	 * @param isCompleted boolean
-	 */
-	protected void setVisibilityCompleted(boolean isCompleted) {
-		completedText.setVisible(isCompleted);
-	}
-
-	/**
-	 * Sets the style to the wrong color: red
-	 * 
-	 * @param row
-	 * @param col
-	 */
-	protected void setStyleWrong(int row, int col) {
-		textFields[row][col].setStyle(styleRed);
-	}
-
-	/**
-	 * Sets the style to the right color: white
-	 * 
-	 * @param row
-	 * @param col
-	 */
-	protected void setStyleRight(int row, int col) {
-		textFields[row][col].setStyle(styleWhite);
-	}
-
-	/**
-	 * @param row int
-	 * @param col int
-	 * 
-	 * @return element String
-	 */
-	protected String getElement(int row, int col) {
-		return textFields[row][col].getText();
-	}
-
-	/**
-	 * @param row
-	 * @param col
-	 * @param value
-	 * @throws Exception
-	 */
-	protected void setElement(int row, int col, int value) throws ElementIsLockedException {
-		if (sudoku.isLocked(row, col)) {
-			textFields[row][col].setText(value + "");
-		} else {
-			throw new ElementIsLockedException(row, col);
-		}
 	}
 
 	/**
@@ -408,6 +345,11 @@ public class SudukoViewController {
 		fillBoardList(array);
 	}
 
+	/**
+	 * Fills an array on the TextField[][] board
+	 * 
+	 * @param array String[][] array to fill on board
+	 */
 	private void fillBoardList(String[][] array) {
 
 		// Initialize GUI board first
@@ -422,6 +364,7 @@ public class SudukoViewController {
 			for (int col = 0; col < NUMB_COLUMN; col++) {
 				textFields[row][col].setText(array[row][col]);
 				if (!textFields[row][col].getText().isEmpty()) {
+					// If element is not empty: lock the element
 					lockElement(row, col, textFields[row][col].getText());
 				}
 			}

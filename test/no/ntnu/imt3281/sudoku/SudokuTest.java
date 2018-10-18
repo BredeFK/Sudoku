@@ -15,12 +15,17 @@ import java.util.ResourceBundle;
 
 import org.junit.Test;
 
+/**
+ * 
+ * @author Fritjof
+ *
+ */
 public class SudokuTest {
 	private Sudoku sudoku = new Sudoku();
 	private static int NUMB_ROW = Sudoku.NUMB_ROW;
 	private static int NUMB_COLUMN = Sudoku.NUMB_COLUMN;
 	private static int SUB_GRID = Sudoku.SUB_GRID;
-	private String emptyElement = " ";
+	private String emptyElement = "";
 	private static String defaultLan = Main.defaultLan;
 	private ResourceBundle bundle = ResourceBundle.getBundle(defaultLan);
 	private String row = bundle.getString("row");
@@ -66,11 +71,31 @@ public class SudokuTest {
 	public void testSetElementInArray() {
 		String value = "9";
 
-		sudoku.setElementinArray(5, 5, value);
+		try {
+			sudoku.setElementinArray(5, 5, value);
+		} catch (ElementIsLockedException e) {
+			// do nothing
+		}
 		String result = sudoku.getElementInArray(5, 5);
+
+		try {
+			sudoku.setElementinArray(5, 5, value);
+		} catch (ElementIsLockedException e) {
+			String expectedMessage = String.format("%s%d, %d%s", bundle.getString("lockedElement"), 5, 5,
+					bundle.getString("locked"));
+			assertEquals(expectedMessage, e.getMessage());
+		}
 
 		assertEquals(value, result);
 
+	}
+
+	@Test
+	public void testUpdateArray() {
+		sudoku.updateArray(8, 8, "0");
+		String result = sudoku.getElementInArray(8, 8);
+
+		assertEquals("0", result);
 	}
 
 	@Test
@@ -288,24 +313,39 @@ public class SudokuTest {
 	public void testSwitchNumbersOnBoard() {
 		String[][] array = new String[NUMB_ROW][NUMB_COLUMN];
 		String[][] result = sudoku.switchNumbersOnBoard(sudoku.newBoard(array));
+		String[][] beforeSwitch = getJsonBoardStringArray();
 
-		assertNotEquals("5", result[0][0]);
-		assertNotEquals("6", result[3][4]);
-		assertNotEquals("8", result[4][3]);
-		assertNotEquals("3", result[4][5]);
-		assertNotEquals("2", result[5][4]);
-		assertNotEquals("9", result[8][8]);
+		for (int i = 0; i < NUMB_ROW; i++) {
+			for (int j = 0; j < NUMB_COLUMN; j++) {
+				if (beforeSwitch[i][j] != "" && result[i][j] != "") {
+					assertNotEquals(beforeSwitch[i][j], result[i][j]);
+				}
+			}
+		}
+	}
 
+	@Test
+	public void testIsLocked() {
+		sudoku.lockElement(3, 4);
+
+		boolean result = sudoku.isLocked(3, 4);
+		assertTrue(result);
 	}
 
 	@Test
 	public void testConvertTo2dInt() {
+		String[][] array = new String[NUMB_ROW][NUMB_COLUMN];
+		int[][] result = sudoku.convertTo2dInt(sudoku.newBoard(array));
+		String[][] beforeConverting = getJsonBoardStringArray();
 
+		for (int i = 0; i < NUMB_ROW; i++) {
+			for (int j = 0; j < NUMB_COLUMN; j++) {
+				if (result[i][j] != -1 && beforeConverting[i][j] != "") {
+					assertEquals(beforeConverting[i][j], (result[i][j] + ""));
+				} else {
+					assertEquals(-1, result[i][j]);
+				}
+			}
+		}
 	}
-
-	@Test
-	public void testGetRandomNumbers() {
-
-	}
-
 }

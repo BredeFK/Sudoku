@@ -1,9 +1,5 @@
 package no.ntnu.imt3281.sudoku;
 
-/**
- * @author Brede Fritjof Klausen
- */
-
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -16,6 +12,12 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * This class is the logic for the Sudoku application
+ * 
+ * @author Fritjof
+ *
+ */
 public class Sudoku {
 
 	protected static final int NUMB_ROW = 9;
@@ -24,7 +26,7 @@ public class Sudoku {
 	private static final Logger logger = Logger.getLogger(Sudoku.class.getName());
 	private static String[][] stringArray = new String[NUMB_ROW][NUMB_COLUMN];
 	private String file = "board.json";
-	private static String defaultLan = Main.defaultLan; // "no.ntnu.imt3281.sudoku.MessagesBundle";
+	private static String defaultLan = Main.defaultLan;
 	private String encoding = "UTF-8";
 	private ResourceBundle bundle = ResourceBundle.getBundle(defaultLan);
 	private boolean[][] isLocked = new boolean[NUMB_ROW][NUMB_COLUMN];
@@ -43,31 +45,41 @@ public class Sudoku {
 	}
 
 	/**
+	 * Sets an element in array if it's not locked
 	 * 
-	 * @param row      int
-	 * @param col      int
-	 * @param newValue String
+	 * @param row      int for the selected element
+	 * @param col      int for the selected element
+	 * @param newValue String for the selected element
+	 * @throws ElementIsLockedException if element is locked
 	 */
-	protected void setElementinArray(int row, int col, String newValue) {
-		stringArray[row][col] = newValue;
+	protected void setElementinArray(int row, int col, String newValue) throws ElementIsLockedException {
+		if (!isLocked(row, col)) {
+			stringArray[row][col] = newValue;
+			lockElement(row, col);
+		} else {
+			throw new ElementIsLockedException(row, col);
+		}
+
 	}
 
 	/**
+	 * Gets the element in the array
 	 * 
-	 * @param row int
-	 * @param col int
+	 * @param row int for the selected element
+	 * @param col int for the selected element
 	 * 
-	 * @return stringArray[row][col] String
+	 * @return stringArray[row][col] String Element on row,col
 	 */
 	protected String getElementInArray(int row, int col) {
 		return stringArray[row][col];
 	}
 
 	/**
+	 * Updates the String array
 	 *
-	 * @param row
-	 * @param col
-	 * @param newValue
+	 * @param row      for the selected element
+	 * @param col      for the selected element
+	 * @param newValue for the selected element
 	 */
 	protected void updateArray(int row, int col, String newValue) {
 		stringArray[row][col] = newValue;
@@ -100,6 +112,7 @@ public class Sudoku {
 		Iterator<String> rowIterator = getIteratorRow(row, array);
 		while (rowIterator.hasNext()) {
 			if (rowIterator.next().equals(value) && i != col) {
+				// If the number is not the selected number
 				throw new BadNumberException(row, i, bundle.getString("row"));
 			}
 			i++;
@@ -110,6 +123,7 @@ public class Sudoku {
 		Iterator<String> colIterator = getIteratorCol(col, array);
 		while (colIterator.hasNext()) {
 			if (colIterator.next().equals(value) && i != row) {
+				// If the number is not the selected number
 				throw new BadNumberException(i, col, bundle.getString("col"));
 			}
 			i++;
@@ -123,6 +137,7 @@ public class Sudoku {
 		for (i = startRow; i < startRow + SUB_GRID; i++) {
 			for (j = startCol; j < startCol + SUB_GRID; j++) {
 				if (boxIterator.next().equals(value) && i != row && j != col) {
+					// If the number is not the selected number
 					throw new BadNumberException(i, j, bundle.getString("box"));
 				}
 			}
@@ -135,9 +150,9 @@ public class Sudoku {
 	/**
 	 * Returns an iterator object for the row
 	 * 
-	 * @param row
+	 * @param row int The selected row
 	 * 
-	 * @return Iterator<String>
+	 * @return Iterator<String> the preferred row
 	 */
 	protected Iterator<String> getIteratorRow(int row, String[][] array) {
 		ArrayList<String> arrayListRow = new ArrayList<>();
@@ -150,9 +165,9 @@ public class Sudoku {
 	/**
 	 * Returns an iterator object for the column
 	 * 
-	 * @param col
+	 * @param col int The selected column
 	 * 
-	 * @return Iterator<String>
+	 * @return Iterator<String> the preferred column
 	 */
 	protected Iterator<String> getIteratorCol(int col, String[][] array) {
 		ArrayList<String> arrayListCol = new ArrayList<>();
@@ -163,14 +178,14 @@ public class Sudoku {
 	}
 
 	/**
-	 * Returns an iterator object for the sub-grid box
+	 * Returns an iterator object for the sub-grid box<br>
 	 * 
 	 * Source for checking sub-grid: {@link https://www.baeldung.com/java-sudoku}
 	 * 
-	 * @param row
-	 * @param col
+	 * @param row int The selected row
+	 * @param col int The selected column
 	 * 
-	 * @return Iterator<String>
+	 * @return Iterator<String> The preferred box-grid
 	 * 
 	 */
 	protected Iterator<String> getIteratorBox(int row, int col, String[][] array) {
@@ -196,7 +211,9 @@ public class Sudoku {
 	 * Source for converting stringBuffer to integer values
 	 * {@link https://stackoverflow.com/questions/29717963/converting-a-stringbuilder-to-integer-values-in-java}
 	 * 
-	 * @return parsed jsonArray
+	 * @param fileName String name of the file
+	 * @param encoding String name of encoding
+	 * @return array int[][] converted json file
 	 */
 	protected int[][] getJson(String fileName, String encoding) {
 		int[][] array = new int[NUMB_ROW][NUMB_COLUMN];
@@ -241,6 +258,9 @@ public class Sudoku {
 
 	/**
 	 * Unlocks all the elements on the board
+	 * 
+	 * @param array String[][] array to change
+	 * @return array String[][] changed array
 	 */
 	protected String[][] initializeBoard(String[][] array) {
 		for (int row = 0; row < NUMB_ROW; row++) {
@@ -254,6 +274,9 @@ public class Sudoku {
 
 	/**
 	 * Fill the board with numbers
+	 * 
+	 * @param array String[][] array to change
+	 * @return array String[][] changed array
 	 */
 	protected String[][] newBoard(String[][] array) {
 		int[][] temp = getJson(file, encoding);
@@ -263,10 +286,10 @@ public class Sudoku {
 
 			for (int row = 0; row < NUMB_ROW; row++) {
 				for (int col = 0; col < NUMB_COLUMN; col++) {
-					// if number is -1 it's empty
 					if (temp[row][col] != -1) {
+						// if number is empty
 						array[row][col] = (temp[row][col] + "");
-						isLocked[row][col] = true;
+						lockElement(row, col);
 					}
 				}
 			}
@@ -277,6 +300,9 @@ public class Sudoku {
 
 	/**
 	 * Mirror the board
+	 * 
+	 * @param array String[][] array to change
+	 * @return array String[][] changed array
 	 */
 	protected String[][] mirrorBoard(String[][] array) {
 		int[][] temp = convertTo2dInt(array);
@@ -288,8 +314,9 @@ public class Sudoku {
 				// -1 because it goes to from 0 to 8
 				mirrorCol = (NUMB_COLUMN - 1) - col;
 				if (temp[row][mirrorCol] != -1) {
+					// if number is empty
 					array[row][col] = (temp[row][mirrorCol] + "");
-					isLocked[row][col] = true;
+					lockElement(row, col);
 				}
 			}
 		}
@@ -298,6 +325,9 @@ public class Sudoku {
 
 	/**
 	 * Flip the board upside down
+	 * 
+	 * @param array String[][] array to change
+	 * @return array String[][] changed array
 	 */
 	protected String[][] flipBoard(String[][] array) {
 		int[][] temp = convertTo2dInt(array);
@@ -310,8 +340,9 @@ public class Sudoku {
 				mirrorRow = (NUMB_ROW - 1) - row;
 
 				if (temp[mirrorRow][col] != -1) {
+					// if number is empty
 					array[row][col] = (temp[mirrorRow][col] + "");
-					isLocked[row][col] = true;
+					lockElement(row, col);
 				}
 			}
 		}
@@ -320,6 +351,9 @@ public class Sudoku {
 
 	/**
 	 * Flips the board from top-right to bottom-left
+	 * 
+	 * @param array String[][] array to change
+	 * @return array String[][] changed array
 	 */
 	protected String[][] flipBlueBoard(String[][] array) {
 		int[][] temp = convertTo2dInt(array);
@@ -328,8 +362,9 @@ public class Sudoku {
 		for (int row = 0; row < NUMB_ROW; row++) {
 			for (int col = 0; col < NUMB_COLUMN; col++) {
 				if (temp[col][row] != -1) {
+					// if number is empty
 					array[row][col] = (temp[col][row] + "");
-					isLocked[row][col] = true;
+					lockElement(row, col);
 				}
 			}
 		}
@@ -338,6 +373,9 @@ public class Sudoku {
 
 	/**
 	 * Flips the board from bottom-left to top-right
+	 * 
+	 * @param array String[][] array to change
+	 * @return array String[][] changed array
 	 */
 	protected String[][] flipRedBoard(String[][] array) {
 		int[][] temp = convertTo2dInt(array);
@@ -351,8 +389,9 @@ public class Sudoku {
 				newCol = (NUMB_COLUMN - 1) - col;
 
 				if (temp[newCol][newRow] != -1) {
+					// if number is empty
 					array[row][col] = (temp[newCol][newRow] + "");
-					isLocked[row][col] = true;
+					lockElement(row, col);
 				}
 			}
 		}
@@ -361,6 +400,9 @@ public class Sudoku {
 
 	/**
 	 * Switches numbers on the board
+	 * 
+	 * @param array String[][] array to change
+	 * @return array String[][] changed array
 	 */
 	protected String[][] switchNumbersOnBoard(String[][] array) {
 		int[][] temp = convertTo2dInt(array);
@@ -371,8 +413,9 @@ public class Sudoku {
 		for (int row = 0; row < NUMB_ROW; row++) {
 			for (int col = 0; col < NUMB_COLUMN; col++) {
 				if (temp[row][col] != -1) {
+					// if number is empty
 					array[row][col] = (numbers.get(temp[row][col] - 1) + "");
-					isLocked[row][col] = true;
+					lockElement(row, col);
 				}
 			}
 		}
@@ -380,19 +423,33 @@ public class Sudoku {
 	}
 
 	/**
-	 * @param row int
-	 * @param col int
+	 * Checks if the element in array is locked
 	 * 
-	 * @return true/false
+	 * @param row int selected row
+	 * @param col int selected column
+	 * 
+	 * @return true/false if locked
 	 */
 	protected boolean isLocked(int row, int col) {
 		return isLocked[row][col];
 	}
 
 	/**
-	 * @param array from textFields
+	 * Locks the element in String array
 	 * 
-	 * @return returnArray converted to int[][]
+	 * @param row selected row
+	 * @param col selected column
+	 */
+	protected void lockElement(int row, int col) {
+		isLocked[row][col] = true;
+	}
+
+	/**
+	 * Converts String array to int array where empty is -1
+	 * 
+	 * @param array String[][] from textFields
+	 * 
+	 * @return returnArray int[][] converted to int array
 	 */
 	protected int[][] convertTo2dInt(String[][] array) {
 		int[][] returnArray = new int[NUMB_ROW][NUMB_COLUMN];
@@ -431,6 +488,8 @@ public class Sudoku {
 		while (numbers.size() < NUMB_ROW) {
 			int number = rnd.nextInt(NUMB_ROW) + 1;
 			if (!numbers.contains(number) && number != (index + 1)) {
+				// if list doesn't contain number and number isn't the same value as the number
+				// it's going to change: add number
 				numbers.add(index++, number);
 
 			} else if (index == (NUMB_ROW - 1) && number == NUMB_ROW && !numbers.contains(NUMB_ROW)) {

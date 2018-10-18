@@ -8,6 +8,12 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+/**
+ * Merges the fxml file with the controller
+ * 
+ * @author Fritjof
+ *
+ */
 public class Main extends Application {
 	@SuppressWarnings("unused")
 	private static String norwegian = "no.ntnu.imt3281.sudoku.MessagesBundle_nb_NO";

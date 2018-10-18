@@ -1,9 +1,5 @@
 package no.ntnu.imt3281.sudoku;
 
-/**
- * @author Brede Fritjof Klausen
- */
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -11,6 +7,11 @@ import java.util.ResourceBundle;
 
 import org.junit.Test;
 
+/**
+ * 
+ * @author Fritjof
+ *
+ */
 public class ElementIsLockedExceptionTest {
 	private int row = 0;
 	private int col = 0;

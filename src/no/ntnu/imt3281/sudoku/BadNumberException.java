@@ -3,7 +3,10 @@ package no.ntnu.imt3281.sudoku;
 import java.util.ResourceBundle;
 
 /**
- * @author Brede Fritjof Klausen
+ * Exception that is called on when a number is already on row/col/box
+ * 
+ * @author Fritjof
+ *
  */
 public class BadNumberException extends Exception {
 
@@ -11,10 +14,11 @@ public class BadNumberException extends Exception {
 	private final int row;
 	private final int col;
 	private final String place;
-	private static String defaultLan = Main.defaultLan;// "no.ntnu.imt3281.sudoku.MessagesBundle";
+	private static String defaultLan = Main.defaultLan;
 	private ResourceBundle bundle = ResourceBundle.getBundle(defaultLan);
 
 	/**
+	 * Constructor for the class
 	 * 
 	 * @param row   int row number
 	 * @param col   int column number
