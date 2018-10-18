@@ -132,7 +132,8 @@ public class SudukoViewController {
 					public void changed(ObservableValue<? extends String> observable, String oldValue,
 							String newValue) {
 
-						sudoku.updateArray(selectedRow, selectedCol, newValue);
+						// sudoku.updateArray(selectedRow, selectedCol, newValue);
+						checkIfValidInput(selectedRow, selectedCol);
 					}
 				});
 			}
@@ -161,6 +162,65 @@ public class SudukoViewController {
 		borderPane.setCenter(grid);
 		layoutPane.getChildren().addAll(lines);
 		layoutPane.getChildren().add(completedText);
+	}
+
+	/**
+	 * 
+	 * @return temp String[][]
+	 */
+	protected String[][] convertTo2dString() {
+		String[][] temp = new String[NUMB_ROW][NUMB_COLUMN];
+		for (int row = 0; row < NUMB_ROW; row++) {
+			for (int col = 0; col < NUMB_COLUMN; col++) {
+				temp[row][col] = textFields[row][col].getText();
+			}
+		}
+		return temp;
+	}
+
+	/**
+	 * @param stringArray String[][]
+	 * 
+	 * @return textFieldArray TextField[][]
+	 */
+	protected TextField[][] convertTo2dTextField(String[][] stringArray) {
+		TextField[][] textFieldArray = new TextField[NUMB_ROW][NUMB_COLUMN];
+
+		for (int row = 0; row < NUMB_ROW; row++) {
+			for (int col = 0; col < NUMB_COLUMN; col++) {
+				textFieldArray[row][col] = new TextField();
+				textFieldArray[row][col].setText(stringArray[row][col]);
+			}
+		}
+
+		return textFieldArray;
+	}
+
+	/**
+	 * This function only updates the array when it's a valid input.
+	 * 
+	 * @param row
+	 * @param col
+	 * @param newValue
+	 */
+	protected void checkIfValidInput(int row, int col) {
+		String[][] array = convertTo2dString();
+
+		try {
+			boolean result = sudoku.isValid(row, col, textFields[row][col].getText(), array);
+			if (result) {
+				sudoku.updateArray(row, col, textFields[row][col].getText());
+				setStyleRight(row, col);
+				completedText.setVisible(checkIfCompleted());
+			} else {
+				unlockElement(row, col);
+				completedText.setVisible(checkIfCompleted());
+			}
+		} catch (BadNumberException e) {
+			sudoku.updateArray(row, col, textFields[row][col].getText());
+			setStyleWrong(row, col);
+			logger.log(Level.WARNING, e.getMessage());
+		}
 	}
 
 	/**
@@ -214,10 +274,7 @@ public class SudukoViewController {
 	 * @param isCompleted boolean
 	 */
 	protected void setVisibilityCompleted(boolean isCompleted) {
-		// TODO : make this not null
-		if (isCompleted)
-			logger.log(Level.INFO, "Congratulations! You completed the Board");
-		// completedText.setVisible(isCompleted);
+		completedText.setVisible(isCompleted);
 	}
 
 	/**

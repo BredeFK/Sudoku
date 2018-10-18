@@ -15,21 +15,14 @@ import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-
-public class Sudoku extends Application {
+public class Sudoku {
 
 	protected static final int NUMB_ROW = 9;
 	protected static final int NUMB_COLUMN = NUMB_ROW;
 	protected static final int SUB_GRID = NUMB_ROW / 3;
 	private static final Logger logger = Logger.getLogger(Sudoku.class.getName());
 	private static String[][] stringArray = new String[NUMB_ROW][NUMB_COLUMN];
-	private String file = "board.json";
+	private String file = "board-almost-solved.json";
 	private String encoding = "UTF-8";
 	private SudukoViewController controller = new SudukoViewController(9);
 
@@ -43,19 +36,6 @@ public class Sudoku extends Application {
 				stringArray[i][j] = "";
 			}
 		}
-	}
-
-	public static void main(String[] args) {
-		launch(args);
-	}
-
-	@Override
-	public void start(Stage primaryStage) throws Exception {
-		Parent root = FXMLLoader.load(getClass().getResource("SudukoView.fxml"));
-		Scene scene = new Scene(root);
-		primaryStage.setTitle("Velkommen til Suduko");
-		primaryStage.setScene(scene);
-		primaryStage.show();
 	}
 
 	/**
@@ -80,29 +60,13 @@ public class Sudoku extends Application {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param row
 	 * @param col
 	 * @param newValue
 	 */
 	protected void updateArray(int row, int col, String newValue) {
 		stringArray[row][col] = newValue;
-
-		try {
-			boolean result = isValid(row, col, stringArray[row][col], stringArray);
-			if (result) {
-				controller.setStyleRight(row, col);
-				controller.setVisibilityCompleted(controller.checkIfCompleted());
-			} else {
-				Platform.runLater(() -> {
-					controller.unlockElement(row, col);
-				});
-				controller.setVisibilityCompleted(controller.checkIfCompleted());
-			}
-		} catch (BadNumberException e) {
-			controller.setStyleWrong(row, col);
-			logger.log(Level.WARNING, e.getMessage());
-		}
 	}
 
 	/**
@@ -279,16 +243,16 @@ public class Sudoku extends Application {
 
 		if (temp != null) {
 			initializeBoard();
-			Platform.runLater(() -> {
-				for (int row = 0; row < NUMB_ROW; row++) {
-					for (int col = 0; col < NUMB_COLUMN; col++) {
-						// if number is -1 it's empty
-						if (temp[row][col] != -1) {
-							controller.lockElement(row, col, temp[row][col] + "");
-						}
+
+			for (int row = 0; row < NUMB_ROW; row++) {
+				for (int col = 0; col < NUMB_COLUMN; col++) {
+					// if number is -1 it's empty
+					if (temp[row][col] != -1) {
+						controller.lockElement(row, col, temp[row][col] + "");
 					}
 				}
-			});
+			}
+
 		}
 	}
 
@@ -310,18 +274,16 @@ public class Sudoku extends Application {
 		int[][] temp = convertTo2dInt(stringArray);
 
 		initializeBoard();
-		Platform.runLater(() -> {
-			int mirrorCol = 0;
-			for (int row = 0; row < NUMB_ROW; row++) {
-				for (int col = 0; col < NUMB_COLUMN; col++) {
-					// -1 because it goes to from 0 to 8
-					mirrorCol = (NUMB_COLUMN - 1) - col;
-					if (temp[row][mirrorCol] != -1) {
-						controller.lockElement(row, col, temp[row][mirrorCol] + "");
-					}
+		int mirrorCol = 0;
+		for (int row = 0; row < NUMB_ROW; row++) {
+			for (int col = 0; col < NUMB_COLUMN; col++) {
+				// -1 because it goes to from 0 to 8
+				mirrorCol = (NUMB_COLUMN - 1) - col;
+				if (temp[row][mirrorCol] != -1) {
+					controller.lockElement(row, col, temp[row][mirrorCol] + "");
 				}
 			}
-		});
+		}
 
 	}
 
@@ -332,19 +294,17 @@ public class Sudoku extends Application {
 		int[][] temp = convertTo2dInt(stringArray);
 
 		initializeBoard();
-		Platform.runLater(() -> {
-			int mirrorRow = 0;
-			for (int row = 0; row < NUMB_ROW; row++) {
-				for (int col = 0; col < NUMB_COLUMN; col++) {
-					// -1 because it goes to from 0 to 8
-					mirrorRow = (NUMB_ROW - 1) - row;
+		int mirrorRow = 0;
+		for (int row = 0; row < NUMB_ROW; row++) {
+			for (int col = 0; col < NUMB_COLUMN; col++) {
+				// -1 because it goes to from 0 to 8
+				mirrorRow = (NUMB_ROW - 1) - row;
 
-					if (temp[mirrorRow][col] != -1) {
-						controller.lockElement(row, col, temp[mirrorRow][col] + "");
-					}
+				if (temp[mirrorRow][col] != -1) {
+					controller.lockElement(row, col, temp[mirrorRow][col] + "");
 				}
 			}
-		});
+		}
 	}
 
 	/**
@@ -354,16 +314,13 @@ public class Sudoku extends Application {
 		int[][] temp = convertTo2dInt(stringArray);
 
 		initializeBoard();
-		Platform.runLater(() -> {
-			for (int row = 0; row < NUMB_ROW; row++) {
-				for (int col = 0; col < NUMB_COLUMN; col++) {
-					if (temp[col][row] != -1) {
-						controller.lockElement(row, col, temp[col][row] + "");
-					}
+		for (int row = 0; row < NUMB_ROW; row++) {
+			for (int col = 0; col < NUMB_COLUMN; col++) {
+				if (temp[col][row] != -1) {
+					controller.lockElement(row, col, temp[col][row] + "");
 				}
 			}
-		});
-
+		}
 	}
 
 	/**
@@ -373,21 +330,18 @@ public class Sudoku extends Application {
 		int[][] temp = convertTo2dInt(stringArray);
 
 		initializeBoard();
-		Platform.runLater(() -> {
-			int newRow = 0;
-			int newCol = 0;
-			for (int row = 0; row < NUMB_ROW; row++) {
-				for (int col = 0; col < NUMB_COLUMN; col++) {
-					newRow = (NUMB_ROW - 1) - row;
-					newCol = (NUMB_COLUMN - 1) - col;
+		int newRow = 0;
+		int newCol = 0;
+		for (int row = 0; row < NUMB_ROW; row++) {
+			for (int col = 0; col < NUMB_COLUMN; col++) {
+				newRow = (NUMB_ROW - 1) - row;
+				newCol = (NUMB_COLUMN - 1) - col;
 
-					if (temp[newCol][newRow] != -1) {
-						controller.lockElement(row, col, temp[newCol][newRow] + "");
-					}
+				if (temp[newCol][newRow] != -1) {
+					controller.lockElement(row, col, temp[newCol][newRow] + "");
 				}
 			}
-		});
-
+		}
 	}
 
 	/**
@@ -398,16 +352,14 @@ public class Sudoku extends Application {
 		ArrayList<Integer> numbers = getRandomNumbers();
 
 		initializeBoard();
-		Platform.runLater(() -> {
 
-			for (int row = 0; row < NUMB_ROW; row++) {
-				for (int col = 0; col < NUMB_COLUMN; col++) {
-					if (temp[row][col] != -1) {
-						controller.lockElement(row, col, numbers.get(temp[row][col] - 1) + "");
-					}
+		for (int row = 0; row < NUMB_ROW; row++) {
+			for (int col = 0; col < NUMB_COLUMN; col++) {
+				if (temp[row][col] != -1) {
+					controller.lockElement(row, col, numbers.get(temp[row][col] - 1) + "");
 				}
 			}
-		});
+		}
 	}
 
 	/**
