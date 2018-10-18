@@ -26,8 +26,8 @@ public class Sudoku {
 	private String file = "board.json";
 	private static String defaultLan = Main.defaultLan; // "no.ntnu.imt3281.sudoku.MessagesBundle";
 	private String encoding = "UTF-8";
-	private SudukoViewController controller = new SudukoViewController(9);
 	private ResourceBundle bundle = ResourceBundle.getBundle(defaultLan);
+	private boolean[][] isLocked = new boolean[NUMB_ROW][NUMB_COLUMN];
 
 	/**
 	 * Constructor for the class Sudoku
@@ -37,6 +37,7 @@ public class Sudoku {
 		for (int i = 0; i < NUMB_ROW; i++) {
 			for (int j = 0; j < NUMB_COLUMN; j++) {
 				stringArray[i][j] = "";
+				isLocked[i][j] = false;
 			}
 		}
 	}
@@ -245,6 +246,7 @@ public class Sudoku {
 		for (int row = 0; row < NUMB_ROW; row++) {
 			for (int col = 0; col < NUMB_COLUMN; col++) {
 				array[row][col] = "";
+				isLocked[row][col] = false;
 			}
 		}
 		return array;
@@ -264,6 +266,7 @@ public class Sudoku {
 					// if number is -1 it's empty
 					if (temp[row][col] != -1) {
 						array[row][col] = (temp[row][col] + "");
+						isLocked[row][col] = true;
 					}
 				}
 			}
@@ -286,6 +289,7 @@ public class Sudoku {
 				mirrorCol = (NUMB_COLUMN - 1) - col;
 				if (temp[row][mirrorCol] != -1) {
 					array[row][col] = (temp[row][mirrorCol] + "");
+					isLocked[row][col] = true;
 				}
 			}
 		}
@@ -307,6 +311,7 @@ public class Sudoku {
 
 				if (temp[mirrorRow][col] != -1) {
 					array[row][col] = (temp[mirrorRow][col] + "");
+					isLocked[row][col] = true;
 				}
 			}
 		}
@@ -324,6 +329,7 @@ public class Sudoku {
 			for (int col = 0; col < NUMB_COLUMN; col++) {
 				if (temp[col][row] != -1) {
 					array[row][col] = (temp[col][row] + "");
+					isLocked[row][col] = true;
 				}
 			}
 		}
@@ -346,6 +352,7 @@ public class Sudoku {
 
 				if (temp[newCol][newRow] != -1) {
 					array[row][col] = (temp[newCol][newRow] + "");
+					isLocked[row][col] = true;
 				}
 			}
 		}
@@ -365,10 +372,21 @@ public class Sudoku {
 			for (int col = 0; col < NUMB_COLUMN; col++) {
 				if (temp[row][col] != -1) {
 					array[row][col] = (numbers.get(temp[row][col] - 1) + "");
+					isLocked[row][col] = true;
 				}
 			}
 		}
 		return array;
+	}
+
+	/**
+	 * @param row int
+	 * @param col int
+	 * 
+	 * @return true/false
+	 */
+	protected boolean isLocked(int row, int col) {
+		return isLocked[row][col];
 	}
 
 	/**
@@ -380,7 +398,7 @@ public class Sudoku {
 		int[][] returnArray = new int[NUMB_ROW][NUMB_COLUMN];
 		for (int row = 0; row < NUMB_ROW; row++) {
 			for (int col = 0; col < NUMB_COLUMN; col++) {
-				if (controller.isLocked(row, col)) {
+				if (isLocked(row, col)) {
 					returnArray[row][col] = Integer.parseInt(array[row][col]);
 				} else {
 					returnArray[row][col] = -1;
